@@ -194,9 +194,15 @@ func isTruncated(tweet Tweet) bool {
 	return false
 }
 
-// TODO: Replace shorten URL with real URLs
 // TODO: Render links to mentioned people to Twitter accounts.
+// TODO: Replace other shortened URL buff.ly, tinyurl, etc, to remove dependency to third-party service.
 func tweetToMd(tweet Tweet) string {
 	// Insert two spaces at end of line to generate Markdown line break
-	return strings.Replace(tweet.FullText, "\n", "  \n", 0)
+	markdown := strings.Replace(tweet.FullText, "\n", "  \n", 0)
+	// Replace Twitter URLs with original URLs
+	for _, u := range tweet.Entities.Urls {
+		mdURL := fmt.Sprintf("[%s](%s)", u.DisplayUrl, u.ExpandedUrl)
+		markdown = strings.Replace(markdown, u.Url, mdURL, 1)
+	}
+	return markdown
 }
