@@ -4,7 +4,7 @@ This repository provides a set of tools to analyse / convert personal data from 
 
 ## Twitter
 
-You can ask Twitter to download your archive here: [https://twitter.com/settings/your_twitter_data](Your Twitter Data).  
+You can ask Twitter to download your archive here: [Your Twitter Data](https://twitter.com/settings/your_twitter_data).  
 You will receive a link to download your archive when ready.
 
 When you got it, you can unzip the file and convert your tweets to a Markdown directory structure with the command:
