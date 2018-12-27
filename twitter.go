@@ -72,6 +72,9 @@ func (t Tweets) Less(i, j int) bool { return t[i].Timestamp.Before(t[j].Timestam
 // Post metadata struct for marshaling
 
 type Metadata struct {
+	Type      string
+	Lang      string
+	HashTags  []HashTag `json:",omitempty"`
 	CreatedAt time.Time
 }
 
@@ -132,12 +135,28 @@ func TwitterToMD(archiveDir, OutputDir string) error {
 			index = 1
 		}
 
-		// Real stuff
+		// Create directory for post
 		targetDir := filepath.Join(OutputDir, newDir, fmt.Sprintf("%03d", index))
 		if err = os.MkdirAll(targetDir, 0755); err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet)), 0644)
+		// Generate markdown for post
+		if err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet)), 0644); err != nil {
+			return err
+		}
+		// Generate Metadata file
+		metadata := Metadata{
+			Type:      "microblog",
+			Lang:      tweet.Lang,
+			CreatedAt: tweet.Timestamp,
+		}
+		meta, err := json.Marshal(metadata)
+		if err != nil {
+			return err
+		}
+		if err = ioutil.WriteFile(filepath.Join(targetDir, "metadata.json"), meta, 0644); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -176,6 +195,7 @@ func isTruncated(tweet Tweet) bool {
 }
 
 // TODO: Replace shorten URL with real URLs
+// TODO: Render links to mentioned people to Twitter accounts.
 func tweetToMd(tweet Tweet) string {
 	// Insert two spaces at end of line to generate Markdown line break
 	return strings.Replace(tweet.FullText, "\n", "  \n", 0)
