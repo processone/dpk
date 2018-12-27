@@ -69,7 +69,6 @@ Before you submit your pull request consider the following guidelines:
 
 * Search [GitHub][github-pr] for an open or closed Pull Request
   that relates to your submission. You don't want to duplicate effort.
-* Create the [development environment][developer-setup]
 * Make your changes in a new git branch:
 
     ```shell
@@ -77,7 +76,7 @@ Before you submit your pull request consider the following guidelines:
     ```
 * Test your changes and, if relevant, expand the automated test suite.
 * Create your patch commit, including appropriate test cases.
-* If the changes affect public APIs, change or add relevant [documentation][doc-repo].
+* If the changes affect public APIs, change or add relevant documentation.
 * Commit your changes using a descriptive commit message.
 
     ```shell
