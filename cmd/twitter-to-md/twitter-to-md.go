@@ -14,6 +14,7 @@ func main() {
 	if len(args) < 2 {
 		fmt.Println("Missing argument.")
 		usage()
+		os.Exit(1)
 	}
 
 	if err := dpk.TwitterToMD(args[0], args[1]); err != nil {
