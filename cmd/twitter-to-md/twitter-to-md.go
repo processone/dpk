@@ -1,7 +1,7 @@
 package main
 
-import "github.com/mremond/twitter-to-md"
+import "github.com/processone/dpk"
 
 func main() {
-	twitter_to_md.TwitterToMD("", "")
+	dpk.TwitterToMD("", "")
 }
