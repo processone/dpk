@@ -6,4 +6,5 @@
   We could just generate link.
 - Add media types to metadata file
 - Add metadata to SQLite index at root dir.
+- Write initial test suite
 - Fix JS header removal to make it more generic (in case there is a part1, etc.)
