@@ -9,3 +9,4 @@
 - Write initial test suite.
 - Refactor / clean-up
 - Fix JS header removal to make it more generic (in case there is a part1, etc.)
+- Convert smileys to Emoji

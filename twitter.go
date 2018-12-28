@@ -284,7 +284,7 @@ func isTruncated(tweet Tweet) bool {
 // TODO: Replace other shortened URL buff.ly, tinyurl, etc, to remove dependency to third-party service.
 func tweetToMd(tweet Tweet, mediafiles []localMedia) string {
 	// Insert two spaces at end of line to generate Markdown line break
-	markdown := strings.Replace(tweet.FullText, "\n", "  \n", 0)
+	markdown := strings.Replace(tweet.FullText, "\n", "  \n", -1)
 	// Replace Twitter URLs with original URLs
 	for _, u := range tweet.Entities.Urls {
 		mdURL := fmt.Sprintf("[%s](%s)", u.DisplayUrl, u.ExpandedUrl)
