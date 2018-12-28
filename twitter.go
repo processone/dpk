@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -44,21 +45,52 @@ type Entities struct {
 	Urls         []Url
 }
 
+type Variant struct {
+	Bitrate     string
+	ContentType string `json:"content_type"`
+	Url         string
+}
+
+// Sort variants by reverse bitrate. highest quality video will be first.
+type Variants []Variant
+
+func (v Variants) Len() int           { return len(v) }
+func (v Variants) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
+func (v Variants) Less(i, j int) bool { return v[i].Bitrate > v[j].Bitrate }
+
+type VideoInfo struct {
+	AspectRatio []string `json:"aspect_ratio"`
+	Variants    Variants
+}
+
+// Media filename is TweetID-FilePartOfTheMediaUrl
+type Media struct {
+	// Type can be "photo", "animated_gif", "video"
+	Type      string
+	Url       string
+	MediaUrl  string    `json:"media_url"`
+	VideoInfo VideoInfo `json:"video_info"`
+}
+
+type ExtendedEntities struct {
+	Media []Media
+}
+
 type Tweet struct {
-	Id             string `json:"id_str"`
-	FullText       string `json:"full_text"`
-	Lang           string
-	Retweeted      bool
-	FavoriteCount  string `json:"favorite_count"`
-	RetweetCount   string `json:"retweet_count"`
-	CreatedAt      string `json:"created_at"`
-	ReplyToTweetId string `json:"in_reply_to_status_id_str"`
-	ReplyToUser    string `json:"in_reply_to_screen_name"`
-	ClientLink     string `json:"source"`
-	Entities       Entities
-	// TODO Media support
-	Truncated bool
-	Timestamp time.Time
+	Id               string `json:"id_str"`
+	FullText         string `json:"full_text"`
+	Lang             string
+	Retweeted        bool
+	FavoriteCount    string `json:"favorite_count"`
+	RetweetCount     string `json:"retweet_count"`
+	CreatedAt        string `json:"created_at"`
+	ReplyToTweetId   string `json:"in_reply_to_status_id_str"`
+	ReplyToUser      string `json:"in_reply_to_screen_name"`
+	ClientLink       string `json:"source"`
+	Entities         Entities
+	ExtendedEntities ExtendedEntities `json:"extended_entities"`
+	Truncated        bool
+	Timestamp        time.Time
 }
 
 // Implements Sorter interface
@@ -76,6 +108,12 @@ type Metadata struct {
 	Lang      string
 	HashTags  []HashTag `json:",omitempty"`
 	CreatedAt time.Time
+}
+
+type localMedia struct {
+	mediaType    string
+	filename     string
+	originalLink string
 }
 
 //=============================================================================
@@ -144,6 +182,15 @@ func TwitterToMD(archiveDir, OutputDir string) error {
 		if err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet)), 0644); err != nil {
 			return err
 		}
+		// Copy media
+		for _, mediafile := range getMedia(tweet) {
+			err = copyFile(
+				filepath.Join(archiveDir, "tweet_media", mediafile.filename),
+				filepath.Join(targetDir, mediafile.filename))
+			if err != nil {
+				fmt.Println("Error copying", mediafile.filename)
+			}
+		}
 		// Generate Metadata file
 		metadata := Metadata{
 			Type:      "microblog",
@@ -160,6 +207,44 @@ func TwitterToMD(archiveDir, OutputDir string) error {
 	}
 
 	return nil
+}
+
+func getMedia(tweet Tweet) []localMedia {
+	var files []localMedia
+	for _, media := range tweet.ExtendedEntities.Media {
+		mediafile := ""
+		switch media.Type {
+		case "photo":
+			mediafile = baseName(media.MediaUrl)
+		case "animated_gif":
+			variants := media.VideoInfo.Variants
+			if len(variants) > 0 {
+				sort.Sort(variants)
+				mediafile = baseName(variants[0].Url)
+			}
+		case "video":
+			variants := media.VideoInfo.Variants
+			if len(variants) > 0 {
+				sort.Sort(variants)
+				mediafile = baseName(variants[0].Url)
+			}
+		}
+		if mediafile != "" {
+			filename := fmt.Sprintf("%s-%s", tweet.Id, mediafile)
+			files = append(files, localMedia{
+				mediaType:    media.Type,
+				filename:     filename,
+				originalLink: media.Url,
+			})
+		}
+	}
+	return files
+}
+
+func baseName(url string) string {
+	name := filepath.Base(url)
+	nameWithoutParams := strings.Split(name, "?")
+	return nameWithoutParams[0]
 }
 
 func rubyDateToTime(timeString string) (time.Time, error) {
@@ -205,4 +290,26 @@ func tweetToMd(tweet Tweet) string {
 		markdown = strings.Replace(markdown, u.Url, mdURL, 1)
 	}
 	return markdown
+}
+
+// copyFile the src file to dst. Any existing file will be overwritten and will not
+// copy file attributes.
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Close()
 }
