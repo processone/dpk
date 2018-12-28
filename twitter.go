@@ -111,9 +111,9 @@ type Metadata struct {
 }
 
 type localMedia struct {
-	mediaType    string
-	filename     string
-	originalLink string
+	mediaType   string
+	filename    string
+	originalUrl string
 }
 
 //=============================================================================
@@ -178,18 +178,19 @@ func TwitterToMD(archiveDir, OutputDir string) error {
 		if err = os.MkdirAll(targetDir, 0755); err != nil {
 			return err
 		}
-		// Generate markdown for post
-		if err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet)), 0644); err != nil {
-			return err
-		}
 		// Copy media
-		for _, mediafile := range getMedia(tweet) {
+		mediafiles := getMedia(tweet)
+		for _, mediafile := range mediafiles {
 			err = copyFile(
 				filepath.Join(archiveDir, "tweet_media", mediafile.filename),
 				filepath.Join(targetDir, mediafile.filename))
 			if err != nil {
 				fmt.Println("Error copying", mediafile.filename)
 			}
+		}
+		// Generate markdown for post
+		if err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet, mediafiles)), 0644); err != nil {
+			return err
 		}
 		// Generate Metadata file
 		metadata := Metadata{
@@ -232,9 +233,9 @@ func getMedia(tweet Tweet) []localMedia {
 		if mediafile != "" {
 			filename := fmt.Sprintf("%s-%s", tweet.Id, mediafile)
 			files = append(files, localMedia{
-				mediaType:    media.Type,
-				filename:     filename,
-				originalLink: media.Url,
+				mediaType:   media.Type,
+				filename:    filename,
+				originalUrl: media.Url,
 			})
 		}
 	}
@@ -281,13 +282,38 @@ func isTruncated(tweet Tweet) bool {
 
 // TODO: Render links to mentioned people to Twitter accounts.
 // TODO: Replace other shortened URL buff.ly, tinyurl, etc, to remove dependency to third-party service.
-func tweetToMd(tweet Tweet) string {
+func tweetToMd(tweet Tweet, mediafiles []localMedia) string {
 	// Insert two spaces at end of line to generate Markdown line break
 	markdown := strings.Replace(tweet.FullText, "\n", "  \n", 0)
 	// Replace Twitter URLs with original URLs
 	for _, u := range tweet.Entities.Urls {
 		mdURL := fmt.Sprintf("[%s](%s)", u.DisplayUrl, u.ExpandedUrl)
 		markdown = strings.Replace(markdown, u.Url, mdURL, 1)
+	}
+	// Replace Twitter URL for media with media rendering
+	for i, media := range mediafiles {
+		mdMedia := ""
+		switch media.mediaType {
+		case "photo":
+			mdMedia = fmt.Sprintf("\n![attachment %2d](%s)\n", i, media.filename)
+		case "video":
+			template := `
+<video controls>
+ <source src="%s" type="video/mp4">
+ Your browser does not support the video tag.
+</video>
+`
+			mdMedia = fmt.Sprintf(template, media.filename)
+		case "animated_gif":
+			template := `
+<video controls loop>
+ <source src="%s" type="video/mp4">
+ Your browser does not support the video tag.
+</video>
+`
+			mdMedia = fmt.Sprintf(template, media.filename)
+		}
+		markdown = strings.Replace(markdown, media.originalUrl, mdMedia, 1)
 	}
 	return markdown
 }
