@@ -7,5 +7,6 @@
 - Add media types to metadata file
 - Add metadata to SQLite index at root dir.
 - Rename media file to shorter / more friendly filenames.
-- Write initial test suite
+- Write initial test suite.
+- Refactor / clean-up
 - Fix JS header removal to make it more generic (in case there is a part1, etc.)
