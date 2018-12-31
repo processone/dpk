@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/microcosm-cc/bluemonday"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -287,7 +290,7 @@ func tweetToMd(tweet Tweet, targetDir string, mediafiles []localMedia) string {
 	markdown := strings.Replace(tweet.FullText, "\n", "  \n", -1)
 	// Replace Twitter URLs with original URLs
 	for _, u := range tweet.Entities.Urls {
-		mdURL := fmt.Sprintf("[%s](%s)", u.DisplayUrl, u.ExpandedUrl)
+		mdURL := renderLink(u.DisplayUrl, u.ExpandedUrl)
 		markdown = strings.Replace(markdown, u.Url, mdURL, 1)
 	}
 	// Replace Twitter URL for media with media rendering
@@ -318,6 +321,75 @@ func tweetToMd(tweet Tweet, targetDir string, mediafiles []localMedia) string {
 	}
 	return markdown
 }
+
+func renderLink(displayUrl, link string) string {
+	u, err := url.Parse(link)
+	if err != nil {
+		// Not a valid URL, just return the link as is:
+		return link
+	}
+	if u.Host == "twitter.com" {
+		// If expanded tweet start with https://www.twitter.com, try embedding the tweet:
+		return twitterEmbed(displayUrl, link)
+	}
+	return defaultLink(displayUrl, link)
+}
+
+//=============================================================================
+// Link rendering / embedding
+
+type OEmbed struct {
+	EmbedType    string `json:"type"`
+	URL          string
+	AuthorName   string `json:"author_name"`
+	AuthorURL    string `json:"author_url"`
+	HTML         string
+	Width        int
+	Height       int
+	CacheAge     string `json:"cache_age"`
+	ProviderName string `json:"provider_name"`
+	ProviderURL  string `json:"provider_url"`
+	Version      string
+}
+
+func twitterEmbed(displayUrl, link string) string {
+	fmt.Println("Processing link:", link)
+	apiEndpoint := fmt.Sprintf("https://publish.twitter.com/oembed?url=%s", link)
+	resp, err := http.Get(apiEndpoint)
+	if err != nil {
+		fmt.Println(err)
+		return defaultLink(displayUrl, link)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println(err)
+			return defaultLink(displayUrl, link)
+		}
+
+		var embed OEmbed
+		if err = json.Unmarshal(data, &embed); err != nil {
+			fmt.Println(err)
+			return defaultLink(displayUrl, link)
+		}
+		// Remove Javascript
+		policy := bluemonday.UGCPolicy()
+		policy.AllowStyling()
+		html := policy.Sanitize(embed.HTML)
+
+		return "\n" + html
+	}
+	return defaultLink(displayUrl, link)
+}
+
+func defaultLink(displayUrl, link string) string {
+	return fmt.Sprintf("[%s](%s)", displayUrl, link)
+}
+
+//=============================================================================
+// Helpers
 
 // copyFile the src file to dst. Any existing file will be overwritten and will not
 // copy file attributes.
