@@ -2,6 +2,15 @@
 
 This repository provides a set of tools to analyse / convert personal data from online services.
 
+## General principles
+
+The goal of the tool is to produce content that is self contained. As such, we do not want to rely on third-party
+services that can disappear at anytime. That's why as much as we can, we try to resolve short URLs to their final
+target.
+
+We also do not want to promote trackers. When using Twitter oembed for example, we sanitize the provided HTML and
+thus we do not includes the `widget.js` Javascript tags.
+
 ## Twitter
 
 You can ask Twitter to download your archive here: [Your Twitter Data](https://twitter.com/settings/your_twitter_data).  
