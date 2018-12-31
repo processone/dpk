@@ -1,7 +1,6 @@
 # TODO
 
 - Render Youtube links
-- Replace common urls shorteners links (buff.ly, tinyurl, etc.)
 - Resolve twitter short url inside embedded tweets.
 - Generate entries for liked tweets ? They are not included in archive, so requires querying Twitter API to get them.
   We could just generate link.

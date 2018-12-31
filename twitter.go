@@ -7,6 +7,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -328,10 +329,20 @@ func renderLink(displayUrl, link string) string {
 		// Not a valid URL, just return the link as is:
 		return link
 	}
-	if u.Host == "twitter.com" {
+	switch u.Host {
+	case "twitter.com":
 		// If expanded tweet start with https://www.twitter.com, try embedding the tweet:
 		return twitterEmbed(displayUrl, link)
+	case "buff.ly":
+		return resolveShortUrl(displayUrl, link)
+	case "bit.ly":
+		return resolveShortUrl(displayUrl, link)
+	case "t.co":
+		return resolveShortUrl(displayUrl, link)
+	case "tinyurl.com":
+		return resolveShortUrl(displayUrl, link)
 	}
+
 	return defaultLink(displayUrl, link)
 }
 
@@ -355,7 +366,8 @@ type OEmbed struct {
 func twitterEmbed(displayUrl, link string) string {
 	fmt.Println("Processing link:", link)
 	apiEndpoint := fmt.Sprintf("https://publish.twitter.com/oembed?url=%s", link)
-	resp, err := http.Get(apiEndpoint)
+	client := httpClient()
+	resp, err := client.Get(apiEndpoint)
 	if err != nil {
 		fmt.Println(err)
 		return defaultLink(displayUrl, link)
@@ -384,8 +396,49 @@ func twitterEmbed(displayUrl, link string) string {
 	return defaultLink(displayUrl, link)
 }
 
+func resolveShortUrl(displayUrl, link string) string {
+	fmt.Println("Processing link:", link)
+	client := httpClient()
+	resp, err := client.Get(link)
+	if err != nil {
+		fmt.Println(err)
+		return defaultLink(displayUrl, link)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 301 {
+		location := resp.Header.Get("Location")
+		fmt.Println("=> Resolved as", location)
+
+		u, err := url.Parse(location)
+		if err != nil {
+			// Not a valid URL, just return the link as is:
+			return defaultLink(displayUrl, link)
+		}
+
+		return defaultLink(u.Host, location)
+	}
+	return defaultLink(displayUrl, link)
+}
+
 func defaultLink(displayUrl, link string) string {
 	return fmt.Sprintf("[%s](%s)", displayUrl, link)
+}
+
+func httpClient() *http.Client {
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout: 5 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout: 5 * time.Second,
+	}
+	return &http.Client{
+		Timeout:   time.Second * 15,
+		Transport: transport,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 }
 
 //=============================================================================
