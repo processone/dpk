@@ -189,7 +189,7 @@ func TwitterToMD(archiveDir, OutputDir string) error {
 			}
 		}
 		// Generate markdown for post
-		if err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet, mediafiles)), 0644); err != nil {
+		if err = ioutil.WriteFile(filepath.Join(targetDir, "post.md"), []byte(tweetToMd(tweet, targetDir, mediafiles)), 0644); err != nil {
 			return err
 		}
 		// Generate Metadata file
@@ -282,7 +282,7 @@ func isTruncated(tweet Tweet) bool {
 
 // TODO: Render links to mentioned people to Twitter accounts.
 // TODO: Replace other shortened URL buff.ly, tinyurl, etc, to remove dependency to third-party service.
-func tweetToMd(tweet Tweet, mediafiles []localMedia) string {
+func tweetToMd(tweet Tweet, targetDir string, mediafiles []localMedia) string {
 	// Insert two spaces at end of line to generate Markdown line break
 	markdown := strings.Replace(tweet.FullText, "\n", "  \n", -1)
 	// Replace Twitter URLs with original URLs
@@ -292,10 +292,11 @@ func tweetToMd(tweet Tweet, mediafiles []localMedia) string {
 	}
 	// Replace Twitter URL for media with media rendering
 	for i, media := range mediafiles {
+		fullpath := filepath.Join("/", targetDir, media.filename)
 		mdMedia := ""
 		switch media.mediaType {
 		case "photo":
-			mdMedia = fmt.Sprintf("\n![attachment %2d](%s)\n", i, media.filename)
+			mdMedia = fmt.Sprintf("\n![attachment %2d](%s)\n", i, fullpath)
 		case "video":
 			template := `
 <video controls>
@@ -303,7 +304,7 @@ func tweetToMd(tweet Tweet, mediafiles []localMedia) string {
  Your browser does not support the video tag.
 </video>
 `
-			mdMedia = fmt.Sprintf(template, media.filename)
+			mdMedia = fmt.Sprintf(template, fullpath)
 		case "animated_gif":
 			template := `
 <video controls loop>
@@ -311,7 +312,7 @@ func tweetToMd(tweet Tweet, mediafiles []localMedia) string {
  Your browser does not support the video tag.
 </video>
 `
-			mdMedia = fmt.Sprintf(template, media.filename)
+			mdMedia = fmt.Sprintf(template, fullpath)
 		}
 		markdown = strings.Replace(markdown, media.originalUrl, mdMedia, 1)
 	}
