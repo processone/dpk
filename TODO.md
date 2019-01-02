@@ -11,3 +11,22 @@
 - Refactor / clean-up
 - Fix JS header removal to make it more generic (in case there is a part1, etc.)
 - Convert smileys to Emoji
+
+## URL sanitization
+
+- Fix m.engadget.com links (the domain does not exist anymore)
+Example:
+ http://m.engadget.com/default/article.do?artUrl=http://www.engadget.com/2011/02/08/nokia-ceo-stephen-elop-rallies-troops-in-brutally-honest-burnin/&category=classic&postPage=1
+ => http://www.engadget.com/2011/02/08/nokia-ceo-stephen-elop-rallies-troops-in-brutally-honest-burnin/&category=classic&postPage=1
+
+## Roadmap
+
+Other services to support for archive cleaning and unification:
+
+- Instagram
+- Facebook
+- Hangout
+- Medium
+- LinkedIn
+- Pinterest
+- Flickr
