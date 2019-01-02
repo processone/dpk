@@ -333,14 +333,11 @@ func renderLink(displayUrl, link string) string {
 	case "twitter.com":
 		// If expanded tweet start with https://www.twitter.com, try embedding the tweet:
 		return twitterEmbed(displayUrl, link)
-	case "buff.ly":
+	case "buff.ly", "bit.ly", "t.co", "tinyurl.com", "feedproxy.google.com":
 		return resolveShortUrl(displayUrl, link)
-	case "bit.ly":
-		return resolveShortUrl(displayUrl, link)
-	case "t.co":
-		return resolveShortUrl(displayUrl, link)
-	case "tinyurl.com":
-		return resolveShortUrl(displayUrl, link)
+		// TODO: Youtube
+		//case "youtu.be", "youtube.com":
+		//	return defaultLink(displayUrl, link)
 	}
 
 	return defaultLink(displayUrl, link)
@@ -399,29 +396,49 @@ func twitterEmbed(displayUrl, link string) string {
 func resolveShortUrl(displayUrl, link string) string {
 	fmt.Println("Processing link:", link)
 	client := httpClient()
-	resp, err := client.Get(link)
-	if err != nil {
-		fmt.Println(err)
-		return defaultLink(displayUrl, link)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 301 {
-		location := resp.Header.Get("Location")
-		fmt.Println("=> Resolved as", location)
-
-		u, err := url.Parse(location)
+Loop:
+	// Try to resolve link 7 times, as sometimes you can find a chain of redirects before
+	// reaching the canonical link.
+	for redirect := 0; redirect <= 7; redirect++ {
+		resp, err := client.Get(link)
 		if err != nil {
-			// Not a valid URL, just return the link as is:
+			fmt.Println(err)
 			return defaultLink(displayUrl, link)
 		}
 
-		return defaultLink(u.Host, location)
+		switch resp.StatusCode {
+		case 301, 302:
+			location := resp.Header.Get("Location")
+			fmt.Println("=> Resolved as", location)
+
+			u, err := url.Parse(location)
+			if err != nil {
+				// Not a valid URL, just return the original link as is
+				_ = resp.Body.Close()
+				break Loop
+			}
+			// Retry resolving the next link, with new discovered value
+			displayUrl = u.Host
+			link = location
+		case 200:
+			title := GetTitle(resp.Body, displayUrl)
+			displayUrl = title
+			resp.Body.Close()
+			break Loop
+		default:
+			fmt.Println("Ignored HTTP Status Code:", resp.StatusCode)
+			resp.Body.Close()
+			break Loop
+		}
 	}
+
 	return defaultLink(displayUrl, link)
 }
 
 func defaultLink(displayUrl, link string) string {
+	if len(displayUrl) > 50 {
+		displayUrl = displayUrl[:50] + "…"
+	}
 	return fmt.Sprintf("[%s](%s)", displayUrl, link)
 }
 

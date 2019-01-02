@@ -1,5 +1,10 @@
 # TODO
 
+- Fix relative redirects (with Location: /something)
+  For example:
+   Processing link: https://donate.mozilla.org/
+   => Resolved as /en-US/index.html
+   Get /en-US/index.html: unsupported protocol scheme ""
 - Render Youtube links
 - Resolve twitter short url inside embedded tweets.
 - Generate entries for liked tweets ? They are not included in archive, so requires querying Twitter API to get them.
@@ -12,6 +17,7 @@
 - Fix JS header removal to make it more generic (in case there is a part1, etc.)
 - Convert smileys to Emoji
 - Use similarity to find duplicate post across several source of data
+- Remove utm_ parameters from links (used for tracking promo campaigns)
 
 ## URL sanitization
 
