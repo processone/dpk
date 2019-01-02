@@ -21,7 +21,7 @@ Example:
 
 ## Roadmap
 
-Other services to support for archive cleaning and unification:
+Other possible services to support for archive cleaning and unification:
 
 - Instagram
 - Facebook
@@ -30,3 +30,9 @@ Other services to support for archive cleaning and unification:
 - LinkedIn
 - Pinterest
 - Flickr
+- Quora
+- Pocket
+- Pinboard
+- Dropbox Paper
+- Evernote
+- Feedly
