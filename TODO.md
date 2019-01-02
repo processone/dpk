@@ -25,6 +25,7 @@ Other possible services to support for archive cleaning and unification:
 
 - Instagram
 - Facebook
+- Google+
 - Hangout
 - Medium
 - LinkedIn
