@@ -11,6 +11,7 @@
 - Refactor / clean-up
 - Fix JS header removal to make it more generic (in case there is a part1, etc.)
 - Convert smileys to Emoji
+- Use similarity to find duplicate post across several source of data
 
 ## URL sanitization
 
