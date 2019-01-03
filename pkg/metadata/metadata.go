@@ -6,9 +6,12 @@ import (
 	"golang.org/x/net/html"
 )
 
+// Properties is a map gathering HTML page metadata properties.
 type Properties map[string]string
 
+// Page is structure holding HTML page metadata.
 type Page struct {
+	Lang       string
 	Properties Properties
 }
 
@@ -24,22 +27,9 @@ func (p Page) GetTitle() string {
 	return ""
 }
 
-var knownProperties = []string{
-	// Dublin Core (older version)
-	"dc.title",
-	// Dublin Core (HTML 5)
-	"dc:title", "dc:creator",
-	// Open Graph
-	"og:title", "og:type", "og:url", "og:image",
-	"og:description", "og:site_name",
-	// Twitter
-	"twitter:card", "twitter:site", "twitter:title",
-	"twitter:image", "twitter:description",
-	// Extra real world usage
-	"description",
-}
-
-func FromReader(body io.Reader) (Page, error) {
+// ReadPage is use to extract metadata from an HTML page.
+// It returns a Page struct for easy manipulation of those metadata.
+func ReadPage(body io.Reader) (Page, error) {
 	var p Page
 	p.Properties = make(map[string]string)
 
@@ -65,10 +55,10 @@ Loop:
 					p.Properties[meta.property] = meta.content
 				}
 			case "title":
-				//the next token should be the page title
+				// The next token should be the page title
 				tokenType = tokenizer.Next()
 				if tokenType == html.TextToken {
-					// Use page title but keep on searching of open graph title, which is often more accurate
+					// Use page title but keep on searching an RDFa or Open Graph title, which is often more accurate
 					p.Properties["title"] = tokenizer.Token().Data
 				}
 			}
@@ -82,6 +72,24 @@ Loop:
 	}
 
 	return p, nil
+}
+
+//============================================================================
+// Properties extraction
+
+var knownProperties = []string{
+	// Dublin Core (older version)
+	"dc.title",
+	// Dublin Core (HTML 5)
+	"dc:title", "dc:creator",
+	// Open Graph
+	"og:title", "og:type", "og:url", "og:image",
+	"og:description", "og:site_name",
+	// Twitter
+	"twitter:card", "twitter:site", "twitter:title",
+	"twitter:image", "twitter:description",
+	// Extra real world usage
+	"description",
 }
 
 type meta struct {

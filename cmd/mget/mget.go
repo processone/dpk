@@ -80,7 +80,7 @@ Loop:
 			title = u.Host
 			link = location
 		case 200:
-			page, err := metadata.FromReader(resp.Body)
+			page, err := metadata.ReadPage(resp.Body)
 			if err != nil {
 				fmt.Println("Cannot read metadata: ", err)
 			} else {

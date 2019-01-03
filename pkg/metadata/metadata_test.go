@@ -15,7 +15,7 @@ func TestGetTitle(t *testing.T) {
 		t.Errorf("Cannot read file: %s", testFile)
 	}
 
-	page, err := metadata.FromReader(bytes.NewReader(data))
+	page, err := metadata.ReadPage(bytes.NewReader(data))
 	if err != nil {
 		t.Errorf("cannot read metadata: %v", err)
 		return
