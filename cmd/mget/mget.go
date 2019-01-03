@@ -17,6 +17,8 @@ import (
 // Usage:
 //    mget https://www.process-one.net/
 
+var maxRedirect = 7
+
 // TODO: Extract HTML page metadata as json
 func main() {
 	args := os.Args[1:]
@@ -55,9 +57,7 @@ func getMetadata(link string) string {
 	title := ""
 	client := httpClient()
 Loop:
-	// Try to resolve link 5 times, as sometimes you can find a chain of redirects before
-	// reaching the canonical link.
-	for redirect := 0; redirect <= 5; redirect++ {
+	for redirect := 0; redirect <= maxRedirect; redirect++ {
 		resp, err := client.Get(link)
 		if err != nil {
 			fmt.Println(err)
