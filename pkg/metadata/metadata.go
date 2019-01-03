@@ -50,7 +50,7 @@ Loop:
 			token := tokenizer.Token()
 			switch token.Data {
 			case "meta":
-				meta := extractMeta(token)
+				meta := extract(token)
 				if contains(knownProperties, meta.property) {
 					p.Properties[meta.property] = meta.content
 				}
@@ -78,8 +78,6 @@ Loop:
 // Properties extraction
 
 var knownProperties = []string{
-	// Dublin Core (older version)
-	"dc.title",
 	// Dublin Core (HTML 5)
 	"dc:title", "dc:creator",
 	// Open Graph
@@ -97,7 +95,7 @@ type meta struct {
 	content  string
 }
 
-func extractMeta(token html.Token) meta {
+func extract(token html.Token) meta {
 	var m meta
 
 	for _, attr := range token.Attr {
@@ -118,9 +116,6 @@ func extractMeta(token html.Token) meta {
 
 // TODO also extract og:image. e.g.:
 // <meta property="og:image" content="https://gigaom.com/wp-content/uploads/sites/1/2011/01/sonosgroup-804x516.jpg" />
-// TODO extract dcterms.title
-//  example: <meta name='dcterms.title' content='Amazon&#8217;s dead serious about the enterprise cloud' />
-//  on: https://gigaom.com/2012/11/21/amazons-dead-serious-about-the-enterprise-cloud/
 
 //============================================================================
 // Helper functions
