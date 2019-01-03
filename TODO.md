@@ -5,6 +5,7 @@
    Processing link: https://donate.mozilla.org/
    => Resolved as /en-US/index.html
    Get /en-US/index.html: unsupported protocol scheme ""
+- Resolve HTML 5 / RDFa prefixes properly when parsing page.
 - Render Youtube links
 - Resolve twitter short url inside embedded tweets.
 - Generate entries for liked tweets ? They are not included in archive, so requires querying Twitter API to get them.
