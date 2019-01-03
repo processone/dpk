@@ -36,17 +36,17 @@ func TestTitle(t *testing.T) {
 	}
 }
 
-func ExamplePage_Title() {
+func ExampleReadPage() {
 	html := `<!DOCTYPE html>
-<html lang="en">
-<head prefix="og: http://ogp.me/ns#">
-    <meta charset="utf-8"/>
-    <meta property="og:title" content="Open Graph title" />
-</head>
-<body><p>This is a test page</p></body>
-</html>`
+  <html lang="en">
+  <head prefix="og: http://ogp.me/ns#">
+      <meta charset="utf-8"/>
+      <meta property="og:title" content="Open Graph title" />
+  </head>
+  <body><p>This is a test page</p></body>
+  </html>`
 	if page, err := metadata.ReadPage(strings.NewReader(html)); err != nil {
 		fmt.Println(page.Title())
-		// Output: Open Graph title
 	}
+	// Output: Open Graph title
 }
