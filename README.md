@@ -23,7 +23,9 @@ target.
 We also do not want to promote trackers. When using Twitter oembed for example, we sanitize the provided HTML and
 thus we do not includes the `widget.js` Javascript tags.
 
-## Shortlinks
+## Data conversion
+
+### Shortlinks
 
 URL Shorteners were popular when it was needed to share long links on Twitter, due to Tweet size limitations. Now, they
 are mostly used for click on shared links. Short URL also hide the real link and if the short URL service disappear or
@@ -32,7 +34,7 @@ decide to redirect to another target, the original content will be lost.
 That's why the toolkit provide methods to resolve short URLs and replace the short URL link with it's longer form. It
 helps preserving the web link feature by removing middlemen.
 
-## Twitter
+### Twitter
 
 You can ask Twitter to download your archive here: [Your Twitter Data](https://twitter.com/settings/your_twitter_data).  
 You will receive a link to download your archive when ready.
@@ -47,3 +49,46 @@ It will create a directory with your data in a format you can reuse with your bl
 
 In the process, it will also embed a local representation of quoted tweets and replace shortened links with their
 original value.
+
+## Tooling
+
+### `mget`
+
+`mget` is a command-line tool to download web page metadata and format it as JSON.
+
+It is able to extract metadata using various standards and specifications such as:
+
+- HTML 5 + RDFa (Linked Data)
+- Dublin Core
+- Open Graph
+- Twitter cards
+
+This is an handy tool to explore the semantic web:
+
+You can install it with go command-line tool:
+
+```bash
+$ go get -u github.com/processone/dpk/cmd/mget
+```
+
+Assuming you have `~/go/bin` in your path, you can then run it with:
+
+```
+$ mget https://www.process-one.net
+{
+	"properties": {
+		"description": "ProcessOne delivers rich Messaging, IoT and Push services that will help your business grow.",
+		"og:description": "ProcessOne delivers rich Messaging, IoT and Push services that will help your business grow.",
+		"og:image": "https://static.process-one.net/bootstrap/img/art/p1.jpg",
+		"og:title": "Build Awesome Realtime Software with ProcessOne",
+		"og:type": "product",
+		"og:url": "https://www.process-one.net/en/",
+		"title": "Build Awesome Realtime Software with ProcessOne",
+		"twitter:card": "summary_large_image",
+		"twitter:description": "ProcessOne delivers rich Messaging, IoT and Push services that will help your business grow.",
+		"twitter:image": "https://static.process-one.net/bootstrap/img/art/p1.jpg",
+		"twitter:site": "@processone",
+		"twitter:title": "Build Awesome Realtime Software with ProcessOne"
+	}
+}
+```  
