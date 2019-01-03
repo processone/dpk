@@ -17,7 +17,7 @@ type Page struct {
 
 // GetTitle returns the page title based on defined priorities (dc > og > twitter > title)
 func (p Page) GetTitle() string {
-	propNames := []string{"dc.title", "og:title", "twitter:title", "title"}
+	propNames := []string{"dc:title", "og:title", "twitter:title", "title"}
 	for _, name := range propNames {
 		value := p.Properties[name]
 		if value != "" {
