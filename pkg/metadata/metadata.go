@@ -11,8 +11,8 @@ type Properties map[string]string
 
 // Page is structure holding HTML page metadata.
 type Page struct {
-	Lang       string
-	Properties Properties
+	Lang       string     `json:"lang,omitempty"`
+	Properties Properties `json:"properties,omitempty"`
 
 	// TODO(mr) Support for prefixes
 	prefixes map[string]string
