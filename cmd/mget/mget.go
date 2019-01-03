@@ -65,7 +65,8 @@ Loop:
 		switch resp.StatusCode {
 		case 301, 302:
 			location := resp.Header.Get("Location")
-			fmt.Println("=> Resolved as", location)
+			// TODO: Display using debug or verbose option
+			// fmt.Println("=> Resolved as", location)
 
 			_, err := url.Parse(location)
 			if err != nil {
