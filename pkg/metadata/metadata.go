@@ -6,10 +6,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Dublin Core metadata are defined here: http://www.dublincore.org/documents/dces/
-// Open Graph metadata (Facebook) are defined here: http://ogp.me/
-// Twitter metadata are defined here: https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/markup
-
 type Properties map[string]string
 
 type Page struct {
@@ -38,7 +34,9 @@ var knownProperties = []string{
 	"og:description", "og:site_name",
 	// Twitter
 	"twitter:card", "twitter:site", "twitter:title",
-	"twitter:image",
+	"twitter:image", "twitter:description",
+	// Extra real world usage
+	"description",
 }
 
 func FromReader(body io.Reader) (Page, error) {
