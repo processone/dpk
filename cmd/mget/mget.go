@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/processone/dpk"
+	"github.com/processone/dpk/pkg/metadata"
 )
 
 // Extract page title
@@ -24,7 +24,7 @@ func main() {
 	args := os.Args[1:]
 
 	if len(args) == 0 {
-		fmt.Println("Missing argument.")
+		fmt.Println("Missing url")
 		usage()
 		os.Exit(1)
 	}
@@ -37,6 +37,7 @@ func usage() {
 	fmt.Println("Usage: mget [URL]")
 }
 
+// httpClient adds safer default values to Go HTTP client.
 func httpClient() *http.Client {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
@@ -79,7 +80,12 @@ Loop:
 			title = u.Host
 			link = location
 		case 200:
-			title = dpk.GetTitle(resp.Body, title)
+			page, err := metadata.FromReader(resp.Body)
+			if err != nil {
+				fmt.Println("Cannot read metadata: ", err)
+			} else {
+				title = page.GetTitle()
+			}
 			_ = resp.Body.Close()
 			break Loop
 		default:

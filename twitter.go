@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/microcosm-cc/bluemonday"
 	"io"
 	"io/ioutil"
 	"net"
@@ -15,6 +14,10 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/microcosm-cc/bluemonday"
+
+	"github.com/processone/dpk/pkg/metadata"
 )
 
 //=============================================================================
@@ -421,8 +424,10 @@ Loop:
 			displayUrl = u.Host
 			link = location
 		case 200:
-			title := GetTitle(resp.Body, displayUrl)
-			displayUrl = title
+			page, err := metadata.FromReader(resp.Body)
+			if err == nil {
+				displayUrl = page.GetTitle()
+			}
 			resp.Body.Close()
 			break Loop
 		default:
