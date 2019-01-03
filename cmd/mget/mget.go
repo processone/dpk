@@ -84,7 +84,7 @@ Loop:
 			if err != nil {
 				fmt.Println("Cannot read metadata: ", err)
 			} else {
-				title = page.GetTitle()
+				title = page.Title()
 			}
 			_ = resp.Body.Close()
 			break Loop

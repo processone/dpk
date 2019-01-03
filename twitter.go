@@ -426,7 +426,7 @@ Loop:
 		case 200:
 			page, err := metadata.ReadPage(resp.Body)
 			if err == nil {
-				displayUrl = page.GetTitle()
+				displayUrl = page.Title()
 			}
 			resp.Body.Close()
 			break Loop

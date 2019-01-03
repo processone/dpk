@@ -13,10 +13,13 @@ type Properties map[string]string
 type Page struct {
 	Lang       string
 	Properties Properties
+
+	// TODO(mr) Support for prefixes
+	prefixes map[string]string
 }
 
-// GetTitle returns the page title based on defined priorities (dc > og > twitter > title)
-func (p Page) GetTitle() string {
+// Title returns the page title based on defined priorities (html 5 > dc > og > twitter > title)
+func (p Page) Title() string {
 	propNames := []string{"dc:title", "og:title", "twitter:title", "title"}
 	for _, name := range propNames {
 		value := p.Properties[name]
@@ -114,9 +117,6 @@ func extract(token html.Token) meta {
 	return m
 }
 
-// TODO also extract og:image. e.g.:
-// <meta property="og:image" content="https://gigaom.com/wp-content/uploads/sites/1/2011/01/sonosgroup-804x516.jpg" />
-
 //============================================================================
 // Helper functions
 
@@ -128,3 +128,16 @@ func contains(array []string, str string) bool {
 	}
 	return false
 }
+
+//=============================================================================
+// TODO
+
+// References:
+// - Contains example for XHTML and for setting metadata outside of HTML head
+//   https://www.w3.org/MarkUp/2009/rdfa-for-html-authors
+
+// TODO also extract og:image. e.g.:
+// <meta property="og:image" content="https://gigaom.com/wp-content/uploads/sites/1/2011/01/sonosgroup-804x516.jpg" />
+
+// TODO Add support for older Dublin Core syntax.
+// See: https://www.slideshare.net/eduservfoundation/dublin-core-basic-syntax-tutorial

@@ -2,13 +2,15 @@ package metadata_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/processone/dpk/pkg/metadata"
 )
 
-func TestGetTitle(t *testing.T) {
+func TestTitle(t *testing.T) {
 	testFile := "fixtures/links-1.html"
 	data, err := ioutil.ReadFile(testFile)
 	if err != nil {
@@ -29,7 +31,22 @@ func TestGetTitle(t *testing.T) {
 
 	// Open Graph has a high priority
 	expected = "Open Graph title"
-	if page.GetTitle() != expected {
-		t.Errorf("Could not extract correct title from '%s'. Got: '%s' Expected: '%s'", testFile, page.GetTitle(), expected)
+	if page.Title() != expected {
+		t.Errorf("Could not extract correct title from '%s'. Got: '%s' Expected: '%s'", testFile, page.Title(), expected)
+	}
+}
+
+func ExamplePage_Title() {
+	html := `<!DOCTYPE html>
+<html lang="en">
+<head prefix="og: http://ogp.me/ns#">
+    <meta charset="utf-8"/>
+    <meta property="og:title" content="Open Graph title" />
+</head>
+<body><p>This is a test page</p></body>
+</html>`
+	if page, err := metadata.ReadPage(strings.NewReader(html)); err != nil {
+		fmt.Println(page.Title())
+		// Output: Open Graph title
 	}
 }
