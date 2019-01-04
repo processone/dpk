@@ -5,8 +5,8 @@
    Processing link: https://donate.mozilla.org/
    => Resolved as /en-US/index.html
    Get /en-US/index.html: unsupported protocol scheme ""
-- Resolve HTML 5 / RDFa prefixes properly when parsing page.
-- Render Youtube links
+- Resolve twitter short url inside embedded tweets.
+- Prerender Youtube links
   It should work by embedding content in a way that avoid tracking. We cannot just embed Youtube video snippet.
   The archives converter should:
   - Download the video cover image locally
@@ -17,7 +17,7 @@
   Do not track policy (Like what Medium is doing for example).
   See: https://webdesign.tutsplus.com/tutorials/how-to-lazy-load-embedded-youtube-videos--cms-26743
   http://coffeespace.org.uk/dnt.js 
-- Resolve twitter short url inside embedded tweets.
+- Resolve HTML 5 / RDFa prefixes properly when parsing page.
 - Generate entries for liked tweets ? They are not included in archive, so requires querying Twitter API to get them.
   We could just generate link.
 - Add media types to metadata file
