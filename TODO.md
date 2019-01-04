@@ -1,10 +1,5 @@
 # TODO
 
-- Fix relative redirects (with Location: /newTarget)
-  For example:
-   Processing link: https://donate.mozilla.org/
-   => Resolved as /en-US/index.html
-   Get /en-US/index.html: unsupported protocol scheme ""
 - Resolve twitter short url inside embedded tweets.
 - Prerender Youtube links
   It should work by embedding content in a way that avoid tracking. We cannot just embed Youtube video snippet.
