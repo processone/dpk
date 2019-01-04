@@ -7,6 +7,16 @@
    Get /en-US/index.html: unsupported protocol scheme ""
 - Resolve HTML 5 / RDFa prefixes properly when parsing page.
 - Render Youtube links
+  It should work by embedding content in a way that avoid tracking. We cannot just embed Youtube video snippet.
+  The archives converter should:
+  - Download the video cover image locally
+  - Generate a preview that do not leak information to Youtube.
+  As a first step, clicking the video will get the browser to load the Youtube page, but later on, we can
+  render the video locally by loading the content from Youtube inline. It will have the same effect as loading the
+  Youtube page, but inline. The "on-demand" video play without forced Youtube script embed will be compliant with
+  Do not track policy (Like what Medium is doing for example).
+  See: https://webdesign.tutsplus.com/tutorials/how-to-lazy-load-embedded-youtube-videos--cms-26743
+  http://coffeespace.org.uk/dnt.js 
 - Resolve twitter short url inside embedded tweets.
 - Generate entries for liked tweets ? They are not included in archive, so requires querying Twitter API to get them.
   We could just generate link.
