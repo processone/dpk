@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"time"
 
+	"github.com/processone/dpk"
 	"github.com/processone/dpk/pkg/metadata"
 )
 
@@ -65,17 +65,15 @@ Loop:
 		switch resp.StatusCode {
 		case 301, 302:
 			location := resp.Header.Get("Location")
-			// TODO: Display using debug or verbose option
-			// fmt.Println("=> Resolved as", location)
-
-			_, err := url.Parse(location)
+			// Retry resolving the next link, with new discovered location
+			link, err = dpk.RedirectUrl(link, location)
 			if err != nil {
 				// Not a valid URL, just return the original link as is
 				_ = resp.Body.Close()
 				break Loop
 			}
-			// Retry resolving the next link, with new discovered location
-			link = location
+			// TODO: Display using debug or verbose option
+			// fmt.Println("=> Resolved as", location)
 		case 200:
 			page, err = metadata.ReadPage(resp.Body)
 			if err != nil {

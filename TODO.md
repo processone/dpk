@@ -1,6 +1,6 @@
 # TODO
 
-- Fix relative redirects (with Location: /something)
+- Fix relative redirects (with Location: /newTarget)
   For example:
    Processing link: https://donate.mozilla.org/
    => Resolved as /en-US/index.html
