@@ -1,5 +1,7 @@
 # Data Portability Kit
 
+[![GoDoc](https://godoc.org/github.com/processone/dpk?status.svg)](https://godoc.org/github.com/processone/dpk)
+
 DPK is a Data Portability Kit. This is the Swift Army Knife that let you take back control on your online data.
 
 Thanks to GDPR, online providers now have to offer takeout features for your data. This is a great opportunity
