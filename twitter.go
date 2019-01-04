@@ -412,9 +412,17 @@ Loop:
 		switch resp.StatusCode {
 		case 301, 302:
 			location := resp.Header.Get("Location")
-			fmt.Println("=> Resolved as", location)
+			// Retry resolving the next link, with new discovered location
+			link, err := RedirectUrl(link, location)
+			if err != nil {
+				// Not a valid URL, just return the original link as is
+				_ = resp.Body.Close()
+				break Loop
+			}
+			// TODO: Display using debug or verbose option
+			// fmt.Println("=> Resolved as", link)
 
-			u, err := url.Parse(location)
+			u, err := url.Parse(link)
 			if err != nil {
 				// Not a valid URL, just return the original link as is
 				_ = resp.Body.Close()
