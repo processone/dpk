@@ -12,7 +12,7 @@ import (
 	"github.com/processone/dpk/pkg/metadata"
 )
 
-// Extract page title
+// Extract page metadata
 // This is the equivalent of wget, but focus on extracting / getting page info
 //
 // Usage:
@@ -20,7 +20,6 @@ import (
 
 var maxRedirect = 7
 
-// TODO: Extract HTML page metadata as json
 func main() {
 	args := os.Args[1:]
 
