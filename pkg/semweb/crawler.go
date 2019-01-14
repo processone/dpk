@@ -5,12 +5,13 @@ import (
 	"sync"
 )
 
-// Extractor is a function that is used to define the process the crawler
-// will execute.
-type Extractor func(io.ReadCloser, Client) ([]string, []interface{})
+type Context struct {
+	Client Client
+	Url    string
+}
 
 type Processor interface {
-	Process(io.Reader, Client) []string
+	Process(io.Reader, Context) []string
 }
 
 // Crawler is a tool to crawl web URLs
@@ -19,14 +20,17 @@ type Crawler struct {
 	queue     chan string
 	wg        sync.WaitGroup
 	processor Processor
+	visited   map[string]bool
 	// TODO define max number of pages to crawl on a given domain to avoid being stuck
 	// on a site generating a infinite number of random URLs.
 }
 
 func NewCrawler(proc Processor) *Crawler {
 	queue := make(chan string)
+	// TODO: Add ability to customize HTTP client => Use option parameter
 	client := NewClient()
-	crawler := Crawler{queue: queue, client: client, processor: proc}
+	crawler := Crawler{queue: queue, client: client,
+		processor: proc, visited: make(map[string]bool)}
 
 	// Main processing loop
 	go func() {
@@ -55,20 +59,26 @@ func (c *Crawler) enqueue(url string) {
 }
 
 // processURL retrieves a give URL and pass it to the features extractor.
-// TODO: Skip url that were already checked.
+// TODO:
+//   - Skip urls that were already checked.
+//   - Store url and their canonical URLs ? check how to best handle canonical url
 func (c *Crawler) processURL(url string) {
 	defer c.wg.Done()
 
+	c.visited[url] = true
 	body, err := c.client.Get(url)
 	if err != nil { // Cannot get URL
 		return
 	}
 
-	// Pass body for page processing
-	newURLs := c.processor.Process(body, c.client)
+	// Pass body for page processing and context for proper page analysis, relative link resolution, etc.
+	context := Context{Client: c.client, Url: url}
+	newURLs := c.processor.Process(body, context)
 	body.Close()
 
 	for _, u := range newURLs {
-		c.enqueue(u)
+		if !c.visited[u] {
+			c.enqueue(u)
+		}
 	}
 }
