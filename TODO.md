@@ -1,6 +1,8 @@
 # TODO
 
 - Improve profile crawler by marking crossreferenced profiles as "certified".
+- [CRAWLER] Add ability to filter on expected content type (defaults to "text/html", as we are building primarily a
+  HTML tool.
 - Resolve twitter short url inside embedded tweets.
 - Prerender Youtube links
   It should work by embedding content in a way that avoid tracking. We cannot just embed Youtube video snippet.
