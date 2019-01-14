@@ -1,5 +1,5 @@
 /*
-Metadata package is a set of tools to parse HTML pages to extract their metadata.
+semweb package provides a set of tools to parse HTML pages to extract their metadata.
 
 For now, the following set of metadata specifications are supported:
 
@@ -12,4 +12,4 @@ For now, the following set of metadata specifications are supported:
 	  https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/markup
 
 */
-package metadata
+package semweb
