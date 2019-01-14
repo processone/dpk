@@ -3,14 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net"
-	"net/http"
 	"os"
-	"time"
 
-	"github.com/processone/dpk"
-	"github.com/processone/dpk/pkg/metadata"
+	"github.com/processone/dpk/pkg/semweb"
 )
 
 // mget is a tools to extract standard information from page metadata, microformats, etc.
@@ -27,8 +22,6 @@ import (
 //
 // Usage:
 //    mget profiles [URL]
-
-var maxRedirect = 7
 
 func main() {
 	args := os.Args[1:]
@@ -86,16 +79,16 @@ func getPageMetadata(pageURL string) error {
 	return nil
 }
 
-func getMetadata(link string) (metadata.Page, error) {
-	var page metadata.Page
-	client := newHttpClient()
-	body, err := client.get(link, maxRedirect)
+func getMetadata(link string) (semweb.Page, error) {
+	var page semweb.Page
+	client := semweb.NewClient()
+	body, err := client.Get(link)
 	if err != nil {
 		return page, err
 	}
 	defer body.Close()
 
-	page, err = metadata.ReadPage(body)
+	page, err = semweb.ReadPage(body)
 	if err != nil {
 		return page, err
 	}
@@ -103,17 +96,11 @@ func getMetadata(link string) (metadata.Page, error) {
 }
 
 //=============================================================================
-// profile crawler
-
-type Profile struct {
-	Description string
-	URL         string
-}
-type Profiles []Profile
+// Profile crawler
 
 func getProfiles(profileURL string) error {
-	client := newHttpClient()
-	body, err := client.get(profileURL, maxRedirect)
+	client := semweb.NewClient()
+	body, err := client.Get(profileURL)
 	if err != nil {
 		return err
 	}
@@ -123,66 +110,18 @@ func getProfiles(profileURL string) error {
 	// Be careful:  We only need to keep bidirectionally certified profiles to avoid spammy URL
 	// Probably we can return a list of certified profile, separated by a list of possible risky profile (we will not
 	// crawl them further).
+	urls, err := semweb.ExtractRelMe(body)
+	if err != nil {
+		return err
+	}
+
+	for _, u := range urls {
+		if targetUrl := client.FollowRedirect(u); targetUrl != "" {
+			fmt.Println(targetUrl)
+		}
+	}
 
 	return nil
-}
-
-//=============================================================================
-// Custom HTTP client
-// Control timeouts, and redirect policy
-
-type httpClient struct {
-	client *http.Client
-	// TODO: Support debug logger
-}
-
-// httpClient adds safer default values to Go HTTP client.
-func newHttpClient() httpClient {
-	transport := &http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout: 5 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout: 5 * time.Second,
-	}
-	client := http.Client{
-		Timeout:   time.Second * 15,
-		Transport: transport,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
-	return httpClient{client: &client}
-}
-
-// get returns a web page, following a predefined number of redirects.
-func (c httpClient) get(url string, maxRedirect int) (io.ReadCloser, error) {
-	for redirect := 0; redirect <= maxRedirect; redirect++ {
-		resp, err := c.client.Get(url)
-		if err != nil {
-			return nil, err
-		}
-
-		switch resp.StatusCode {
-		case 301, 302:
-			location := resp.Header.Get("Location")
-			// Retry resolving the next link, with new discovered location
-			url, err = dpk.RedirectUrl(url, location)
-			resp.Body.Close()
-			if err != nil {
-				// Not a valid URL, do not redirect further
-				return nil, err
-			}
-			// TODO: Display using debug or verbose option
-			// fmt.Println("=> Resolved as", location)
-		case 200:
-			return resp.Body, nil
-		default:
-			resp.Body.Close()
-			return nil, fmt.Errorf("unexpected response code %d", resp.StatusCode)
-		}
-
-	}
-	return nil, fmt.Errorf("maximum number of redirect reached")
 }
 
 /*

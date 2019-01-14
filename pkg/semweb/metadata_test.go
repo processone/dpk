@@ -1,4 +1,4 @@
-package metadata_test
+package semweb_test
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/processone/dpk/pkg/metadata"
+	"github.com/processone/dpk/pkg/semweb"
 )
 
 func TestTitle(t *testing.T) {
@@ -17,7 +17,7 @@ func TestTitle(t *testing.T) {
 		t.Errorf("Cannot read file: %s", testFile)
 	}
 
-	page, err := metadata.ReadPage(bytes.NewReader(data))
+	page, err := semweb.ReadPage(bytes.NewReader(data))
 	if err != nil {
 		t.Errorf("cannot read metadata: %v", err)
 		return
@@ -45,7 +45,7 @@ func ExampleReadPage() {
   </head>
   <body><p>This is a test page</p></body>
   </html>`
-	if page, err := metadata.ReadPage(strings.NewReader(html)); err != nil {
+	if page, err := semweb.ReadPage(strings.NewReader(html)); err != nil {
 		fmt.Println(page.Title())
 	}
 	// Output: Open Graph title

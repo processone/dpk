@@ -17,7 +17,7 @@ import (
 
 	"github.com/microcosm-cc/bluemonday"
 
-	"github.com/processone/dpk/pkg/metadata"
+	"github.com/processone/dpk/pkg/semweb"
 )
 
 //=============================================================================
@@ -396,6 +396,7 @@ func twitterEmbed(displayUrl, link string) string {
 	return defaultLink(displayUrl, link)
 }
 
+// TODO refactor: Reuse function from metadata package.
 func resolveShortUrl(displayUrl, link string) string {
 	fmt.Println("Processing link:", link)
 	client := httpClient()
@@ -432,7 +433,7 @@ Loop:
 			displayUrl = u.Host
 			link = location
 		case 200:
-			page, err := metadata.ReadPage(resp.Body)
+			page, err := semweb.ReadPage(resp.Body)
 			if err == nil {
 				displayUrl = page.Title()
 			}

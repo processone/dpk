@@ -1,7 +1,9 @@
-package metadata
+// It is more general and handle basic metadata, microformats, RDFa, etc.
+package semweb
 
 import (
 	"io"
+	"strings"
 
 	"golang.org/x/net/html"
 )
@@ -30,7 +32,7 @@ func (p Page) Title() string {
 	return ""
 }
 
-// ReadPage is use to extract metadata from an HTML page.
+// ReadPage is used to extract metadata from an HTML page.
 // It returns a Page struct for easy manipulation of those metadata.
 func ReadPage(body io.Reader) (Page, error) {
 	var p Page
@@ -75,6 +77,63 @@ Loop:
 	}
 
 	return p, nil
+}
+
+// ExtractRelMe
+// TODO We also need to extract profiles from linked RDF cards.
+func ExtractRelMe(body io.Reader) ([]string, error) {
+	var urls []string
+
+	tokenizer := html.NewTokenizer(body)
+Loop:
+	for {
+		tokenType := tokenizer.Next()
+
+		switch tokenType {
+		case html.ErrorToken:
+			err := tokenizer.Err()
+			if err != io.EOF {
+				return urls, err
+			}
+			break Loop
+
+		case html.StartTagToken, html.SelfClosingTagToken:
+			token := tokenizer.Token()
+			switch token.Data {
+			case "link", "a":
+				relUrl, matched := matchAttr(token, "rel", "me", "href")
+				if matched {
+					urls = append(urls, relUrl)
+				}
+			}
+		}
+	}
+
+	return urls, nil
+}
+
+// matchAttr returns the value of a given attributes, assuming we match the value of another one.
+// For example, to extract href value on a rel link, you can call:
+// value, matched := matchAttr(token, "rel", "me", "href")
+func matchAttr(token html.Token, attrName, keywordToMatch, attrForValue string) (string, bool) {
+	value := ""
+	matched := false
+	for _, attr := range token.Attr {
+		switch attr.Key {
+		case attrName:
+			keyValue := attr.Val
+
+			keyContent := strings.Split(keyValue, " ")
+			if contains(keyContent, keywordToMatch) {
+				matched = true
+			}
+		case attrForValue:
+			value = attr.Val
+		}
+		if attr.Key == attrName {
+		}
+	}
+	return value, matched
 }
 
 //============================================================================
