@@ -1,6 +1,6 @@
 # TODO
 
-- release mget prebuilt binary on Github.
+- Improve profile crawler by marking crossreferenced profiles as "certified".
 - Resolve twitter short url inside embedded tweets.
 - Prerender Youtube links
   It should work by embedding content in a way that avoid tracking. We cannot just embed Youtube video snippet.
