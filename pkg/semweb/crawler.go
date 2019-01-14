@@ -60,7 +60,6 @@ func (c *Crawler) enqueue(url string) {
 
 // processURL retrieves a give URL and pass it to the features extractor.
 // TODO:
-//   - Skip urls that were already checked.
 //   - Store url and their canonical URLs ? check how to best handle canonical url
 func (c *Crawler) processURL(url string) {
 	defer c.wg.Done()
