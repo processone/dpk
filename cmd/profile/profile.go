@@ -34,7 +34,6 @@ func (cr *CrawlerProcessor) Process(body io.Reader, ctx semweb.Context) []string
 	for i, u := range urls {
 		if targetUrl := ctx.Client.FollowRedirect(u); targetUrl != "" {
 			cleanUrls[i] = targetUrl
-			fmt.Println(targetUrl)
 		}
 	}
 
@@ -46,7 +45,6 @@ func main() {
 	processor := CrawlerProcessor{}
 	c := semweb.NewCrawler(&processor)
 	c.Run("https://twitter.com/mickael")
-	fmt.Println("Finished: ", processor.count)
 	fmt.Println("Profiles:")
 	for _, url := range processor.profileUrls {
 		fmt.Println(url)
