@@ -81,7 +81,7 @@ Loop:
 
 // ExtractRelMe
 // TODO We also need to extract profiles from linked RDF cards.
-func ExtractRelMe(body io.Reader) ([]string, error) {
+func ExtractRelMe(ctx Context, body io.Reader) ([]string, error) {
 	var urls []string
 
 	tokenizer := html.NewTokenizer(body)
@@ -103,7 +103,8 @@ Loop:
 			case "link", "a":
 				relUrl, matched := matchAttr(token, "rel", "me", "href")
 				if matched {
-					urls = append(urls, relUrl)
+					absoluteUrl := ctx.Client.ResolveReference(ctx.Url, relUrl)
+					urls = append(urls, absoluteUrl)
 				}
 			}
 		}
