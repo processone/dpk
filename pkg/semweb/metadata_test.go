@@ -45,8 +45,10 @@ func ExampleReadPage() {
   </head>
   <body><p>This is a test page</p></body>
   </html>`
-	if page, err := semweb.ReadPage(strings.NewReader(html)); err != nil {
-		fmt.Println(page.Title())
+	page, err := semweb.ReadPage(strings.NewReader(html))
+	if err != nil {
+		return
 	}
+	fmt.Println(page.Title())
 	// Output: Open Graph title
 }
