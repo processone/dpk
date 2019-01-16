@@ -1,6 +1,6 @@
 # Data Portability Kit
 
-[![GoDoc](https://godoc.org/github.com/processone/dpk?status.svg)](https://godoc.org/github.com/processone/dpk) [![Codeship](https://app.codeship.com/projects/0dbc4220-fb96-0136-3604-5aa5b52ee74f/status?branch=master)](https://app.codeship.com/projects/322207)
+[![Codeship](https://app.codeship.com/projects/0dbc4220-fb96-0136-3604-5aa5b52ee74f/status?branch=master)](https://app.codeship.com/projects/322207) [![GoDoc](https://godoc.org/github.com/processone/dpk?status.svg)](https://godoc.org/github.com/processone/dpk)
 
 DPK is a Data Portability Kit. This is the Swift Army Knife that let you take back control on your online data.
 
