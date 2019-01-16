@@ -2,3 +2,5 @@ dpk:
   build:
     image: processone/dpk
     dockerfile: Dockerfile
+  environment:
+    - GO111MODULE=on

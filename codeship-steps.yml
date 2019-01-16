@@ -1,2 +1,2 @@
 - service: dpk
-  command: env GO111MODULE=on bash -c "go build ./... && go test ./..."
+  command: bash -c "go build ./... && go test ./..."
