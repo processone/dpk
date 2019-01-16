@@ -1,0 +1,4 @@
+dpk:
+  build:
+    image: processone/dpk
+    dockerfile: Dockerfile
