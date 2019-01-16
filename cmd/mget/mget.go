@@ -110,7 +110,8 @@ func getProfiles(profileURL string) error {
 	// Be careful:  We only need to keep bidirectionally certified profiles to avoid spammy URL
 	// Probably we can return a list of certified profile, separated by a list of possible risky profile (we will not
 	// crawl them further).
-	urls, err := semweb.ExtractRelMe(body)
+	ctx := semweb.Context{Client: client, Url: profileURL}
+	urls, err := semweb.ExtractRelMe(ctx, body)
 	if err != nil {
 		return err
 	}
