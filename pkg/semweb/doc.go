@@ -1,4 +1,5 @@
 /*
+
 semweb package provides a set of tools to parse HTML pages to extract their metadata.
 
 For now, the following set of metadata specifications are supported:
@@ -10,6 +11,8 @@ For now, the following set of metadata specifications are supported:
 	  http://ogp.me/
 	- Twitter. Twitter metadata are defined here:
 	  https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/markup
+
+It includes a crawler tool to help gathering and analysing page metadata and relationships.
 
 */
 package semweb
