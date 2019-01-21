@@ -21,7 +21,8 @@ With DPK, you get the change to get your data in a format that can really be reu
 The main goal for this tool is to help you take back control of your data:
 
 1. You can use it to backup and index data you have uploaded to various cloud services providers.
-2. Or, you can use it to migrate to a new service that you will either fully managed or host with another provider.
+2. You can index your local data as you wish to make them more easily searchable.
+3. Or, you can use it to migrate to a new service that you will either fully managed or host with another provider.
 
 You can take back control of your data incrementally. That said, we encourage you to aim for full control and how your data on your own domain. For more details, you should read and follow the principles of the Indieweb: [Publish (on your) Own Site, Syndicate Elsewhere](https://indieweb.org/POSSE).
 
