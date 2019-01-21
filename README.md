@@ -16,9 +16,18 @@ in a consistent and unique JSON format.
 
 With DPK, you get the change to get your data in a format that can really be reused, without any hidden dependencies.
 
+## Use cases: From backup to migration
+
+The main goal for this tool is to help you take back control of your data:
+
+1. You can use it to backup and index data you have uploaded to various cloud services providers.
+2. Or, you can use it to migrate to a new service that you will either fully managed or host with another provider.
+
+You can take back control of your data incrementally. That said, we encourage you to aim for full control and how your data on your own domain. For more details, you should read and follow the principles of the Indieweb: [Publish (on your) Own Site, Syndicate Elsewhere](https://indieweb.org/POSSE).
+
 ## General principles
 
-The goal of the tool is to produce content that is self contained. As such, we do not want to rely on third-party
+The goal of the tool is to produce a data set that is self-contained and directly usable. As such, we do not want to rely on third-party
 services that can disappear at anytime. That's why as much as we can, we try to resolve short URLs to their final
 target.
 
