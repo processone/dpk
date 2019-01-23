@@ -96,7 +96,6 @@ func walkNode(n *html.Node) {
 		if c := n.FirstChild; c.Type == html.TextNode && c.NextSibling == nil {
 			l.AnchorText = c.Data
 			l = l.Resolve()
-			fmt.Println(l)
 			if needRewrite(c.Data) {
 				c.Data = l.URLTitle
 			}
