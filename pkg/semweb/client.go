@@ -21,6 +21,9 @@ type Client struct {
 	// TODO: Support debug logger
 }
 
+type Response struct {
+}
+
 func NewClient() Client {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
@@ -39,11 +42,12 @@ func NewClient() Client {
 }
 
 // Get returns a web page reader, following a predefined number of redirects.
-func (c Client) Get(url string) (io.ReadCloser, error) {
+// It also return the final URL
+func (c Client) Get(url string) (io.ReadCloser, string, error) {
 	for redirect := 0; redirect <= c.MaxRedirect; redirect++ {
 		resp, err := c.Client.Get(url)
 		if err != nil {
-			return nil, err
+			return nil, url, err
 		}
 
 		switch {
@@ -55,20 +59,20 @@ func (c Client) Get(url string) (io.ReadCloser, error) {
 			_ = resp.Body.Close()
 			if err != nil {
 				// Not a valid URL, do not redirect further
-				return nil, err
+				return nil, url, err
 			}
 			// TODO: Display using debug or verbose option
 			// fmt.Println("=> Resolved as", location)
 		case resp.StatusCode == 200:
 			// Success
-			return resp.Body, nil
+			return resp.Body, url, nil
 		default:
 			_ = resp.Body.Close()
-			return nil, fmt.Errorf("unexpected response code %d", resp.StatusCode)
+			return nil, url, fmt.Errorf("unexpected response code %d", resp.StatusCode)
 		}
 
 	}
-	return nil, fmt.Errorf("maximum number of redirects reached")
+	return nil, url, fmt.Errorf("maximum number of redirects reached")
 }
 
 // Follow redirect and return final URL

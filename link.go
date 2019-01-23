@@ -22,18 +22,17 @@ func (l Link) Resolve() Link {
 		return l
 	}
 
-	fmt.Println("Processing link:", l.URL)
 	l.resolved = true
 
 	client := semweb.NewClient()
-	body, err := client.Get(l.URL) // TODO: Should return a Result having a body (readcloser and an actual URL). What about canonical URLs
+	// TODO: Should return a Result having a body (readcloser) and an actual URL. What about canonical URLs ?
+	body, finalUrl, err := client.Get(l.URL)
 	if err != nil {
 		return l
 	}
 	defer body.Close()
 
-	// TODO: We need the client to return the final URL of the Get:
-	// l.URL = finalUrl
+	l.URL = finalUrl
 	page, err := semweb.ReadPage(body)
 	if err == nil {
 		l.URLTitle = page.Title()

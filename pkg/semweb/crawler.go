@@ -65,7 +65,7 @@ func (c *Crawler) processURL(url string) {
 	defer c.wg.Done()
 
 	c.visited[url] = true
-	body, err := c.client.Get(url)
+	body, _, err := c.client.Get(url)
 	if err != nil { // Cannot get URL
 		return
 	}

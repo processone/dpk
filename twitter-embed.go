@@ -18,7 +18,7 @@ func twitterEmbed(l Link) string {
 	fmt.Println("Processing link:", l.URL)
 	apiEndpoint := fmt.Sprintf("https://publish.twitter.com/oembed?url=%s", l.URL)
 	client := semweb.NewClient()
-	body, err := client.Get(apiEndpoint)
+	body, _, err := client.Get(apiEndpoint)
 	if err != nil {
 		fmt.Println(err)
 		return l.Markdown()
@@ -96,6 +96,7 @@ func walkNode(n *html.Node) {
 		if c := n.FirstChild; c.Type == html.TextNode && c.NextSibling == nil {
 			l.AnchorText = c.Data
 			l = l.Resolve()
+			fmt.Println(l)
 			if needRewrite(c.Data) {
 				c.Data = l.URLTitle
 			}

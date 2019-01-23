@@ -13,12 +13,15 @@ import (
 //=============================================================================
 // Tools to mock HTTP client transport to simulate HTTP queries
 
+// Responder is the signature of the clientMock creation function.
 type Responder func(*http.Request) (*http.Response, error)
 
+// Transport is an http.Transport mock.
 type Transport struct {
 	Responder Responder
 }
 
+// Transport implements http.RoundTripper
 func (m *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if m.Responder != nil {
 		return m.Responder(req)
