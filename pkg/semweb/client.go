@@ -124,7 +124,7 @@ Loop:
 }
 
 // TODO: Should this method be on Context, taking only new link ?
-func (c Client) ResolveReference(base, href string) string {
+func (c *Client) ResolveReference(base, href string) string {
 	uri, err := url.Parse(href)
 	if err != nil {
 		return ""

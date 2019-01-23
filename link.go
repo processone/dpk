@@ -26,7 +26,7 @@ func (l Link) Resolve() Link {
 	l.resolved = true
 
 	client := semweb.NewClient()
-	body, err := client.Get(l.URL) // TODO: Should return an Result having a body (readcloser and an actual URL). What about canonical URLs
+	body, err := client.Get(l.URL) // TODO: Should return a Result having a body (readcloser and an actual URL). What about canonical URLs
 	if err != nil {
 		return l
 	}

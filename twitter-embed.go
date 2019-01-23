@@ -10,42 +10,41 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
+
+	"github.com/processone/dpk/pkg/semweb"
 )
 
 func twitterEmbed(l Link) string {
 	fmt.Println("Processing link:", l.URL)
 	apiEndpoint := fmt.Sprintf("https://publish.twitter.com/oembed?url=%s", l.URL)
-	client := httpClient()
-	resp, err := client.Get(apiEndpoint)
+	client := semweb.NewClient()
+	body, err := client.Get(apiEndpoint)
 	if err != nil {
 		fmt.Println(err)
 		return l.Markdown()
 	}
-	defer resp.Body.Close()
+	defer body.Close()
 
-	if resp.StatusCode == 200 {
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-			return l.Markdown()
-		}
-
-		var embed OEmbed
-		if err = json.Unmarshal(data, &embed); err != nil {
-			fmt.Println(err)
-			return l.Markdown()
-		}
-		// Remove Javascript
-		policy := bluemonday.UGCPolicy()
-		policy.AllowStyling()
-		safeHTML := policy.Sanitize(embed.HTML)
-
-		// Parse HTML to rewrite links
-		html2 := enrichHTML(safeHTML)
-
-		return "\n" + html2
+	data, err := ioutil.ReadAll(body)
+	if err != nil {
+		fmt.Println(err)
+		return l.Markdown()
 	}
-	return l.Markdown()
+
+	var embed OEmbed
+	if err = json.Unmarshal(data, &embed); err != nil {
+		fmt.Println(err)
+		return l.Markdown()
+	}
+	// Remove Javascript
+	policy := bluemonday.UGCPolicy()
+	policy.AllowStyling()
+	safeHTML := policy.Sanitize(embed.HTML)
+
+	// Parse HTML to rewrite links
+	html2 := enrichHTML(safeHTML)
+
+	return "\n" + html2
 }
 
 func enrichHTML(fragment string) string {
