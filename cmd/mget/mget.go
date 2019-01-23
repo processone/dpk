@@ -82,7 +82,7 @@ func getPageMetadata(pageURL string) error {
 func getMetadata(link string) (semweb.Page, error) {
 	var page semweb.Page
 	client := semweb.NewClient()
-	body, err := client.Get(link)
+	body, _, err := client.Get(link)
 	if err != nil {
 		return page, err
 	}
@@ -100,7 +100,7 @@ func getMetadata(link string) (semweb.Page, error) {
 
 func getProfiles(profileURL string) error {
 	client := semweb.NewClient()
-	body, err := client.Get(profileURL)
+	body, _, err := client.Get(profileURL)
 	if err != nil {
 		return err
 	}
