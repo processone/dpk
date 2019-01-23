@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -14,10 +13,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/microcosm-cc/bluemonday"
-
-	"github.com/processone/dpk/pkg/semweb"
 )
 
 //=============================================================================
@@ -294,7 +289,7 @@ func tweetToMd(tweet Tweet, targetDir string, mediafiles []localMedia) string {
 	markdown := strings.Replace(tweet.FullText, "\n", "  \n", -1)
 	// Replace Twitter URLs with original URLs
 	for _, u := range tweet.Entities.Urls {
-		mdURL := renderLink(u.DisplayUrl, u.ExpandedUrl)
+		mdURL := renderLink(Link{URL: u.ExpandedUrl, AnchorText: u.DisplayUrl}, targetDir)
 		markdown = strings.Replace(markdown, u.Url, mdURL, 1)
 	}
 	// Replace Twitter URL for media with media rendering
@@ -326,24 +321,30 @@ func tweetToMd(tweet Tweet, targetDir string, mediafiles []localMedia) string {
 	return markdown
 }
 
-func renderLink(displayUrl, link string) string {
-	u, err := url.Parse(link)
+// renderLink is making link adequate for rendering as a standalone data:
+//  - It will resolve short link url to their final URL
+//  - If the link is a link to a Tweet (like a retweet), tt will download the tweet, and render it as
+//    a standalone piece of HTML. It will thus download images, resolve short URL inside it, etc.
+//    That's why we need the targetDirectory: We can use that directory to download and display local media.
+func renderLink(l Link, targetDir string) string {
+	u, err := url.Parse(l.URL)
 	if err != nil {
 		// Not a valid URL, just return the link as is:
-		return link
+		return l.URL
 	}
 	switch u.Host {
 	case "twitter.com":
 		// If expanded tweet start with https://www.twitter.com, try embedding the tweet:
-		return twitterEmbed(displayUrl, link)
+		return twitterEmbed(l)
 	case "buff.ly", "bit.ly", "t.co", "tinyurl.com", "feedproxy.google.com":
-		return resolveShortUrl(displayUrl, link)
+		newLink := l.Resolve()
+		return newLink.Markdown()
 		// TODO: Youtube
 		//case "youtu.be", "youtube.com":
-		//	return defaultLink(displayUrl, link)
+		//	return markdownURL(displayUrl, link)
 	}
 
-	return defaultLink(displayUrl, link)
+	return l.Markdown()
 }
 
 //=============================================================================
@@ -363,99 +364,6 @@ type OEmbed struct {
 	Version      string
 }
 
-func twitterEmbed(displayUrl, link string) string {
-	fmt.Println("Processing link:", link)
-	apiEndpoint := fmt.Sprintf("https://publish.twitter.com/oembed?url=%s", link)
-	client := httpClient()
-	resp, err := client.Get(apiEndpoint)
-	if err != nil {
-		fmt.Println(err)
-		return defaultLink(displayUrl, link)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 200 {
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-			return defaultLink(displayUrl, link)
-		}
-
-		var embed OEmbed
-		if err = json.Unmarshal(data, &embed); err != nil {
-			fmt.Println(err)
-			return defaultLink(displayUrl, link)
-		}
-		// Remove Javascript
-		policy := bluemonday.UGCPolicy()
-		policy.AllowStyling()
-		html := policy.Sanitize(embed.HTML)
-
-		return "\n" + html
-	}
-	return defaultLink(displayUrl, link)
-}
-
-// TODO refactor: Reuse function from metadata package.
-func resolveShortUrl(displayUrl, link string) string {
-	fmt.Println("Processing link:", link)
-	client := httpClient()
-Loop:
-	// Try to resolve link 7 times, as sometimes you can find a chain of redirects before
-	// reaching the canonical link.
-	for redirect := 0; redirect <= 7; redirect++ {
-		resp, err := client.Get(link)
-		if err != nil {
-			fmt.Println(err)
-			return defaultLink(displayUrl, link)
-		}
-
-		switch resp.StatusCode {
-		case 301, 302:
-			location := resp.Header.Get("Location")
-			// Retry resolving the next link, with new discovered location
-			link, err := RedirectUrl(link, location)
-			if err != nil {
-				// Not a valid URL, just return the original link as is
-				_ = resp.Body.Close()
-				break Loop
-			}
-			// TODO: Display using debug or verbose option
-			// fmt.Println("=> Resolved as", link)
-
-			u, err := url.Parse(link)
-			if err != nil {
-				// Not a valid URL, just return the original link as is
-				_ = resp.Body.Close()
-				break Loop
-			}
-			// Retry resolving the next link, with new discovered value
-			displayUrl = u.Host
-			link = location
-		case 200:
-			page, err := semweb.ReadPage(resp.Body)
-			if err == nil {
-				displayUrl = page.Title()
-			}
-			resp.Body.Close()
-			break Loop
-		default:
-			fmt.Println("Ignored HTTP Status Code:", resp.StatusCode)
-			resp.Body.Close()
-			break Loop
-		}
-	}
-
-	return defaultLink(displayUrl, link)
-}
-
-func defaultLink(displayUrl, link string) string {
-	if len(displayUrl) > 50 {
-		displayUrl = displayUrl[:50] + "…"
-	}
-	return fmt.Sprintf("[%s](%s)", displayUrl, link)
-}
-
 func httpClient() *http.Client {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
@@ -470,29 +378,4 @@ func httpClient() *http.Client {
 			return http.ErrUseLastResponse
 		},
 	}
-}
-
-//=============================================================================
-// Helpers
-
-// copyFile the src file to dst. Any existing file will be overwritten and will not
-// copy file attributes.
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return err
-	}
-	return out.Close()
 }
