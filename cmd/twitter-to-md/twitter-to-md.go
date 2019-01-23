@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/processone/dpk"
 	"os"
+
+	"github.com/processone/dpk"
 )
 
 // This tool is used to convert data from your Twitter archive to a set of Markdown files.
