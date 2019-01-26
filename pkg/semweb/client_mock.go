@@ -76,5 +76,4 @@ func SimplePageResponse(title string) *http.Response {
 		Header:     http.Header{},
 	}
 	return &response
-
 }
