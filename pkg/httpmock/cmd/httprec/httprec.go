@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net"
+	"net/http"
+	"net/url"
 	"os"
+	"time"
 
 	"github.com/processone/dpk/pkg/httpmock"
 )
@@ -36,7 +40,7 @@ func main() {
 	var seq httpmock.Sequence
 	uri := args[0]
 	seqName := args[1]
-	client := httpmock.NewClient()
+	client := newHTTPClient()
 
 	// TODO(mr): Refactor to move to httpmock package.
 Loop:
@@ -71,7 +75,7 @@ Loop:
 			seq.Steps = append(seq.Steps, step)
 			_ = resp.Body.Close()
 			// Retry resolving the next link, with new discovered location
-			uri, err = httpmock.FormatRedirectUrl(uri, location)
+			uri, err = formatRedirectUrl(uri, location)
 			if err != nil {
 				// Not a valid URL, do not redirect further
 				break Loop
@@ -106,4 +110,45 @@ Loop:
 		os.Exit(3)
 	}
 	fmt.Println(sequence)
+}
+
+//=============================================================================
+// Helpers
+
+// newHTTPClient returns an http.Client that does not automatically follow redirects.
+func newHTTPClient() *http.Client {
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout: 5 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout: 5 * time.Second,
+	}
+	client := http.Client{
+		Timeout:   time.Second * 15,
+		Transport: transport,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	return &client
+}
+
+// formatRedirectUrl returns a valid full URL from an original URL and a "Location" Header.
+// It support local redirection on same host.
+func formatRedirectUrl(originalUrl, locationHeader string) (string, error) {
+	newUrl, err := url.Parse(locationHeader)
+	if err != nil {
+		return "", err
+	}
+
+	// This is a relative URL, we need to use the host from original URL
+	if newUrl.Host == "" && newUrl.Scheme == "" {
+		oldUrl, err := url.Parse(originalUrl)
+		if err != nil {
+			return "", err
+		}
+		newUrl.Host = oldUrl.Host
+		newUrl.Scheme = oldUrl.Scheme
+	}
+	return newUrl.String(), nil
 }

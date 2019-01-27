@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 )
 
@@ -83,7 +82,7 @@ type Sequence struct {
 	Steps []Step
 }
 
-// SaveTo stores JSON strean for sequence.
+// SaveTo stores JSON data for sequence.
 func (s Sequence) SaveTo(filePath string) (err error) {
 	file, err := os.Create(filePath)
 	if err != nil {
@@ -96,7 +95,7 @@ func (s Sequence) SaveTo(filePath string) (err error) {
 	return encoder.Encode(s)
 }
 
-// ReadSequence reads a JSON reprensentation from a given file.
+// ReadSequence reads a JSON representation from a given file and generate a valid request sequence.
 func ReadSequence(filePath string) (seq Sequence, err error) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -107,27 +106,4 @@ func ReadSequence(filePath string) (seq Sequence, err error) {
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&seq)
 	return seq, err
-}
-
-//=============================================================================
-// Helpers
-
-// formatRedirectUrl returns a valid full URL from an original URL and a "Location" Header.
-// It support local redirection on same host.
-func FormatRedirectUrl(originalUrl, locationHeader string) (string, error) {
-	newUrl, err := url.Parse(locationHeader)
-	if err != nil {
-		return "", err
-	}
-
-	// This is a relative URL, we need to use the host from original URL
-	if newUrl.Host == "" && newUrl.Scheme == "" {
-		oldUrl, err := url.Parse(originalUrl)
-		if err != nil {
-			return "", err
-		}
-		newUrl.Host = oldUrl.Host
-		newUrl.Scheme = oldUrl.Scheme
-	}
-	return newUrl.String(), nil
 }
