@@ -1,10 +1,7 @@
 package dpk
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
-	"net/http"
 	"testing"
 
 	"github.com/processone/dpk/pkg/httpmock"
@@ -22,32 +19,14 @@ func TestRewriteEmbedded(t *testing.T) {
 }
 
 func TestGetImageUrl(t *testing.T) {
+	// Setup HTTP Mock
+	client := httpmock.NewClient("fixtures/")
 	fixtureName := "GetImageUrl"
-	// TODO(mr): Extract mock and Sequence Responder as a standard httpmock helper:
-	requestNumber := 0
-	responder := func(req *http.Request) (*http.Response, error) {
-		fmt.Printf("Request %d\n", requestNumber)
-		seq, err := httpmock.ReadSequence("fixtures/" + fixtureName + ".json")
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Cannot read fixture %s: %s", fixtureName, err))
-		}
-
-		if len(seq.Steps) <= requestNumber {
-			return nil, errors.New(fmt.Sprintf("Unexpected step %d", requestNumber))
-		}
-
-		curStep := seq.Steps[requestNumber]
-		if req.URL.String() != curStep.RequestURL {
-			return nil, errors.New(fmt.Sprintf("step %d not matching requested URL %s. Expecting %s",
-				requestNumber, req.URL.String(), curStep.RequestURL))
-		}
-		resp, err := curStep.Response.ToHTTPResponse()
-		requestNumber += 1
-		return resp, err
+	if err := client.LoadFixture(fixtureName); err != nil {
+		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
+		return
 	}
 
-	//
-	client := httpmock.NewMockClient(responder)
 	resp, err := client.Get("https://pic.twitter.com/OPYJZhQ9ih")
 	if err != nil {
 		t.Errorf("Get error: %s", err)
@@ -58,5 +37,4 @@ func TestGetImageUrl(t *testing.T) {
 		t.Errorf("Cannot read page body: %s", err)
 		return
 	}
-	//fmt.Printf("%s", page)
 }
