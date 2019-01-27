@@ -14,7 +14,7 @@ import (
 	"github.com/processone/dpk/pkg/semweb"
 )
 
-func twitterEmbed(l Link) string {
+func twitterEmbed(l Link, dataDir string) string {
 	fmt.Println("Processing link:", l.URL)
 	apiEndpoint := fmt.Sprintf("https://publish.twitter.com/oembed?url=%s", l.URL)
 	client := semweb.NewClient()
@@ -42,12 +42,12 @@ func twitterEmbed(l Link) string {
 	safeHTML := policy.Sanitize(embed.HTML)
 
 	// Parse HTML to rewrite links
-	html2 := enrichHTML(safeHTML)
+	html2 := enrichHTML(safeHTML, dataDir)
 
 	return "\n" + html2
 }
 
-func enrichHTML(fragment string) string {
+func enrichHTML(fragment string, dataDir string) string {
 	// ======================================
 	// Parsing
 	context := html.Node{
@@ -65,7 +65,10 @@ func enrichHTML(fragment string) string {
 	// Iterate on all elements in fragment (there is no necessarily a single Root)
 	// to rewrite links
 	for _, n := range doc {
-		walkNode(n)
+		if newNode := walkNode(n, dataDir); newNode != nil {
+			n.Parent.InsertBefore(newNode, n)
+			n.Parent.RemoveChild(n)
+		}
 	}
 
 	// ======================================
@@ -74,7 +77,7 @@ func enrichHTML(fragment string) string {
 	for _, n := range doc {
 		if err := html.Render(buf, n); err != nil {
 			// Return unmodified fragment on error
-			fmt.Println("render error:", err)
+			fmt.Println("html render error:", err)
 			return fragment
 		}
 	}
@@ -82,7 +85,7 @@ func enrichHTML(fragment string) string {
 	return buf.String()
 }
 
-func walkNode(n *html.Node) {
+func walkNode(n *html.Node, dataDir string) *html.Node {
 	if n.Type == html.ElementNode && n.Data == "a" {
 		var l Link
 		for _, a := range n.Attr {
@@ -94,32 +97,68 @@ func walkNode(n *html.Node) {
 
 		// If we have a simple link content, we can rewrite it as well
 		if c := n.FirstChild; c.Type == html.TextNode && c.NextSibling == nil {
-			l.AnchorText = c.Data
-			l = l.Resolve()
-			if needRewrite(c.Data) {
-				c.Data = l.URLTitle
-			}
+			if strings.HasPrefix(c.Data, "pic.twitter.com") { // Content rewrite
+				// Download image and replace link with inline image:
+				if img, err := downloadImage(c.Data, dataDir); err == nil {
+					var newAttr []html.Attribute
+					imgSrc := append(newAttr, html.Attribute{"", "src", img})
+					newNode := html.Node{
+						Type:     html.ElementNode,
+						DataAtom: atom.Img,
+						Data:     "img",
+						Attr:     imgSrc,
+					}
+					return &newNode
+				}
+			} else { // Link rewrite
+				l.AnchorText = c.Data
+				l = l.Resolve()
+				if needRewrite(c.Data) {
+					c.Data = l.URLTitle
+				}
 
-			// TODO: keep other attributes, like class
-			var newAttr []html.Attribute
-			n.Attr = append(newAttr, html.Attribute{"", "href", l.URL})
-			return
+				// TODO: keep other attributes, like class
+				var newAttr []html.Attribute
+				n.Attr = append(newAttr, html.Attribute{"", "href", l.URL})
+				return nil
+			}
 		}
 
 		// Otherwise, resolve only the URL and keep the children untouched
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			walkNode(c)
+			if newNode := walkNode(c, dataDir); newNode != nil {
+				parent := c.Parent
+				if c.NextSibling != nil {
+					parent.RemoveChild(c)
+					parent.InsertBefore(newNode, c.NextSibling)
+				} else {
+					parent.RemoveChild(c)
+					parent.AppendChild(newNode)
+				}
+				c = newNode
+			}
 		}
 
 		l = l.Resolve()
 		n.Attr = []html.Attribute{{Key: "href", Val: l.URL}}
-		return
+		return nil
 	}
 
-	// Just walk down the node structure if this is not a node
+	// Just walk down the node structure if this is not a link node
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		walkNode(c)
+		if newNode := walkNode(c, dataDir); newNode != nil {
+			parent := c.Parent
+			if c.NextSibling != nil {
+				parent.RemoveChild(c)
+				parent.InsertBefore(newNode, c.NextSibling)
+			} else {
+				parent.RemoveChild(c)
+				parent.AppendChild(newNode)
+			}
+			c = newNode
+		}
 	}
+	return nil
 }
 
 func needRewrite(urlText string) bool {
@@ -129,8 +168,24 @@ func needRewrite(urlText string) bool {
 	if strings.HasPrefix(urlText, "https://") {
 		return true
 	}
-	if strings.HasPrefix(urlText, "pic.twitter.com/") {
-		return true
-	}
 	return false
+}
+
+func downloadImage(imageRef, dataDir string) (string, error) {
+	// Discover image URL
+	uri := "https://" + imageRef
+	client := semweb.NewClient()
+	body, _, err := client.Get(uri)
+	if err != nil {
+		return imageRef, err
+	}
+	defer body.Close()
+
+	page, err := semweb.ReadPage(body)
+	if err != nil {
+		return imageRef, err
+	}
+
+	img := page.Properties["og:image"]
+	return img, nil
 }

@@ -335,7 +335,7 @@ func renderLink(l Link, targetDir string) string {
 	switch u.Host {
 	case "twitter.com":
 		// If expanded tweet start with https://www.twitter.com, try embedding the tweet:
-		return twitterEmbed(l)
+		return twitterEmbed(l, targetDir)
 	case "buff.ly", "bit.ly", "t.co", "tinyurl.com", "feedproxy.google.com":
 		newLink := l.Resolve()
 		return newLink.Markdown()
