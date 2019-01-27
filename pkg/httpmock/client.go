@@ -39,8 +39,6 @@ func (m *HTTPMock) LoadFixture(fixtureName string) error {
 	}
 
 	responder := func(req *http.Request) (*http.Response, error) {
-		fmt.Printf("Request %d\n", m.count)
-
 		if len(seq.Steps) <= m.count {
 			return nil, errors.New(fmt.Sprintf("Unexpected step %d", m.count))
 		}
@@ -53,7 +51,7 @@ func (m *HTTPMock) LoadFixture(fixtureName string) error {
 		resp, err := curStep.Response.ToHTTPResponse()
 
 		// Increment or reset step counter
-		if m.count < len(seq.Steps) {
+		if m.count+1 < len(seq.Steps) {
 			m.count += 1
 		} else {
 			m.count = 0

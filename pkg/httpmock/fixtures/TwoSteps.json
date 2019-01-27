@@ -1,0 +1,100 @@
+{
+	"Steps": [
+		{
+			"RequestURL": "https://t.co/tprDWoN8vm",
+			"Response": {
+				"Status": "301 Moved Permanently",
+				"StatusCode": 301,
+				"Proto": "HTTP/2.0",
+				"ProtoMajor": 2,
+				"ProtoMinor": 0,
+				"Header": {
+					"Cache-Control": [
+						"private,max-age=300"
+					],
+					"Content-Length": [
+						"0"
+					],
+					"Date": [
+						"Sun, 27 Jan 2019 17:51:32 GMT"
+					],
+					"Expires": [
+						"Sun, 27 Jan 2019 17:56:31 GMT"
+					],
+					"Location": [
+						"https://blog.process-one.net/moving-away-from-facebook/"
+					],
+					"Server": [
+						"tsa_f"
+					],
+					"Set-Cookie": [
+						"muc=bb192d80-2c17-4f80-8b87-c6f8995cea31; Max-Age=63072000; Expires=Tue, 26 Jan 2021 17:51:31 GMT; Domain=t.co"
+					],
+					"Strict-Transport-Security": [
+						"max-age=0"
+					],
+					"Vary": [
+						"Origin"
+					],
+					"X-Connection-Hash": [
+						"068aa61edfe21d429bfbbc698c2472d1"
+					],
+					"X-Response-Time": [
+						"118"
+					]
+				},
+				"BodyFilename": ""
+			},
+			"Err": ""
+		},
+		{
+			"RequestURL": "https://blog.process-one.net/moving-away-from-facebook/",
+			"Response": {
+				"Status": "200 OK",
+				"StatusCode": 200,
+				"Proto": "HTTP/2.0",
+				"ProtoMajor": 2,
+				"ProtoMinor": 0,
+				"Header": {
+					"Content-Type": [
+						"text/html; charset=UTF-8"
+					],
+					"Date": [
+						"Sun, 27 Jan 2019 17:51:32 GMT"
+					],
+					"Expect-Ct": [
+						"enforce, max-age=30, report-uri=\"https://onefellow.report-uri.com/r/d/ct/enforce\""
+					],
+					"Link": [
+						"\u003chttps://blog.process-one.net/wp-json/\u003e; rel=\"https://api.w.org/\"",
+						"\u003chttps://blog.process-one.net/?p=5376\u003e; rel=shortlink",
+						"\u003chttp://blog.process-one.net/moving-away-from-facebook/\u003e; rel=\"canonical\""
+					],
+					"Public-Key-Pins": [
+						"pin-sha256=\"9ulz2wBHF3y3VhSoo4kb0G/xOVV4d4VkqE8q8TQ8qu4=\"; pin-sha256=\"FWRq+sSegNYuCBdQIQhb+T7w4lHoREiEb7GS5bEil7o=\"; max-age=604800; report-uri=\"https://a545242cceaf2cdcd21d82ec1bd6577d.report-uri.io/r/default/hpkp/enforce\";"
+					],
+					"Server": [
+						"nginx"
+					],
+					"Strict-Transport-Security": [
+						"max-age=63072000;"
+					],
+					"X-Content-Type-Options": [
+						"nosniff"
+					],
+					"X-Frame-Options": [
+						"DENY"
+					],
+					"X-Pingback": [
+						"https://blog.process-one.net/xmlrpc.php"
+					],
+					"X-Xss-Protection": [
+						"1; mode=block"
+					]
+				},
+				"BodyFilename": "TwoSteps-2.html"
+			},
+			"Err": ""
+		}
+	]
+}
