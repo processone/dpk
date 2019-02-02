@@ -16,6 +16,8 @@ type Step struct {
 	Err        string
 }
 
+// SaveBody writes the content of the body to a separate file during the recording of a query.
+// TODO: Should be on a struct ?
 func (step Step) SaveBody(content io.Reader, toFile string) (err error) {
 	file, err := os.Create(toFile)
 	if err != nil {
@@ -77,7 +79,29 @@ func (r Response) ToHTTPResponse() (*http.Response, error) {
 	return &resp, nil
 }
 
-// Sequence is uses to record all the steps of a single HTTP Response.
+/*
+
+TODO: Add the ability to have multiple sequences and to index them.
+Here are the possible data types:
+
+Key {
+  Method
+  URL
+}
+
+Ref {
+SequenceID int
+StepID int
+}
+
+Scenario {
+ Sequences []Sequence
+ index map[key]sequenceId
+}
+
+*/
+
+// Sequence is used to record all the redirect steps of a single HTTP Response.
 type Sequence struct {
 	Steps []Step
 }
