@@ -27,6 +27,7 @@
 - Convert smileys to Emoji
 - Use similarity to find duplicate post across several source of data
 - Remove utm_ parameters from links (used for tracking promo campaigns)
+- Archive content for shared link pages
 
 ## URL sanitization
 
