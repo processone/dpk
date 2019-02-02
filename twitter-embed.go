@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -99,7 +102,7 @@ func walkNode(n *html.Node, dataDir string) *html.Node {
 		if c := n.FirstChild; c.Type == html.TextNode && c.NextSibling == nil {
 			if strings.HasPrefix(c.Data, "pic.twitter.com") { // Content rewrite
 				// Download image and replace link with inline image:
-				if img, err := downloadImage(c.Data, dataDir); err == nil {
+				if img, err := DownloadImage(c.Data, dataDir); err == nil {
 					var newAttr []html.Attribute
 					imgSrc := append(newAttr, html.Attribute{"", "src", img})
 					newNode := html.Node{
@@ -171,19 +174,51 @@ func needRewrite(urlText string) bool {
 	return false
 }
 
-func downloadImage(imageRef, dataDir string) (string, error) {
-	// Discover image URL
-	uri := "https://" + imageRef
-	client := semweb.NewClient()
-	body, _, err := client.Get(uri)
+// DownloadImage downloads a Twitter image based on its pic.twitter.com URL.
+// TODO(mr): Move twitter image manipulation into its own package.
+func DownloadImage(imageRef, dataDir string) (string, error) {
+	imageURL := imageRef
+	if !strings.HasPrefix(imageRef, "http") {
+		imageURL = "https://" + imageRef
+	}
+
+	targetUrl, err := GetImageURL(imageURL)
 	if err != nil {
-		return imageRef, err
+		return imageURL, err
+	}
+
+	resp, err := httpClient().Get(targetUrl)
+	if err != nil {
+		return imageURL, err
+	}
+	defer resp.Body.Close()
+
+	filename := filepath.Join(dataDir, filepath.Base(targetUrl))
+	file, err := os.Create(filename)
+	if err != nil {
+		return imageURL, err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return imageURL, err
+	}
+	return filepath.Base(targetUrl), nil
+}
+
+func GetImageURL(imageUrl string) (string, error) {
+	// Discover image URL
+	client := semweb.NewClient()
+	body, _, err := client.Get(imageUrl)
+	if err != nil {
+		return imageUrl, err
 	}
 	defer body.Close()
 
 	page, err := semweb.ReadPage(body)
 	if err != nil {
-		return imageRef, err
+		return imageUrl, err
 	}
 
 	img := page.Properties["og:image"]
