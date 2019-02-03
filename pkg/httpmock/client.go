@@ -2,7 +2,6 @@ package httpmock
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -30,38 +29,35 @@ func NewClient(fixtureDir string) HTTPMock {
 	return HTTPMock{&c, fixtureDir, 0}
 }
 
-func (m *HTTPMock) LoadFixture(fixtureName string) error {
-	m.count = 0
-	filename := fixtureName + ".json"
-	seq, err := ReadSequence(filepath.Join(m.FixtureDir, filename))
+// LoadScenario reads a scenario from a file and set HTTPMock client responder.
+func (m *HTTPMock) LoadScenario(scenarioName string) error {
+	filename := scenarioName + ".json"
+	scn, _, err := InitScenario(filepath.Join(m.FixtureDir, filename))
 	if err != nil {
 		return err
 	}
 
+	// TODO: Extract responder in a separate function
 	responder := func(req *http.Request) (*http.Response, error) {
-		if len(seq.Steps) <= m.count {
-			return nil, errors.New(fmt.Sprintf("Unexpected step %d", m.count))
+		key := key{method: req.Method, url: req.URL.String()}
+		ref := scn.index[key]
+		if !ref.exist {
+			return nil, errors.New("request not found in scenario")
 		}
 
-		curStep := seq.Steps[m.count]
-		if req.URL.String() != curStep.RequestURL {
-			return nil, errors.New(fmt.Sprintf("step %d not matching requested URL %s. Expecting %s",
-				m.count, req.URL.String(), curStep.RequestURL))
-		}
+		// TODO: Consistency checks to avoid out of range errors ?
+		seq := scn.Sequences[ref.sequenceID]
+		curStep := seq.Steps[ref.stepID]
 		resp, err := curStep.Response.ToHTTPResponse()
 
-		// Increment or reset step counter
-		if m.count+1 < len(seq.Steps) {
-			m.count += 1
-		} else {
-			m.count = 0
-		}
 		return resp, err
 	}
 	m.setResponder(responder)
 	return nil
 }
 
+// setResponder is used to defined your own responder for an HTTPMock client.
+// It can be used for cases for which you to not have a scenario file to load.
 func (m *HTTPMock) setResponder(responder Responder) {
 	var t Transport
 	t.Responder = responder

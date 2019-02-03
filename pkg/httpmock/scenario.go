@@ -3,6 +3,7 @@ package httpmock
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 // Step is used to record one of the HTTP steps in a specific query.
 type Step struct {
 	RequestURL string
+	Method     string
 	Response   Response
 	Err        string
 }
@@ -79,35 +81,69 @@ func (r Response) ToHTTPResponse() (*http.Response, error) {
 	return &resp, nil
 }
 
-/*
-
-TODO: Add the ability to have multiple sequences and to index them.
-Here are the possible data types:
-
-Key {
-  Method
-  URL
-}
-
-Ref {
-SequenceID int
-StepID int
-}
-
-Scenario {
- Sequences []Sequence
- index map[key]sequenceId
-}
-
-*/
-
 // Sequence is used to record all the redirect steps of a single HTTP Response.
 type Sequence struct {
 	Steps []Step
 }
 
-// SaveTo stores JSON data for sequence.
-func (s Sequence) SaveTo(filePath string) (err error) {
+type key struct {
+	method string
+	url    string
+}
+
+type ref struct {
+	exist      bool
+	sequenceID int
+	stepID     int
+}
+
+type index map[key]ref
+
+type Scenario struct {
+	Sequences []Sequence
+	// internal index to access a sequence to send the right replies
+	index index
+	path  string
+}
+
+func (scn *Scenario) Count() int {
+	return len(scn.Sequences)
+}
+
+func (scn *Scenario) AddSequence(seq Sequence) error {
+	// If one of the sequence URL is already in scenario, reject the sequence
+	for _, step := range seq.Steps {
+		key := key{method: step.Method, url: step.RequestURL}
+		if ref := scn.index[key]; ref.exist == true {
+			return fmt.Errorf("duplicate method %s for URL %s", step.Method, step.RequestURL)
+		}
+	}
+
+	scn.Sequences = append(scn.Sequences, seq)
+	scn.updateIndex()
+	return nil
+}
+
+func (scn *Scenario) updateIndex() {
+	index := make(map[key]ref)
+	for seq_i, seq := range scn.Sequences {
+		for step_i, step := range seq.Steps {
+			key := key{
+				method: step.Method,
+				url:    step.RequestURL,
+			}
+			index[key] = ref{
+				exist:      true,
+				sequenceID: seq_i,
+				stepID:     step_i,
+			}
+		}
+	}
+	scn.index = index
+}
+
+// SaveTo stores JSON data for a scenario.
+func (scn *Scenario) SaveTo(filePath string) (err error) {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -116,18 +152,32 @@ func (s Sequence) SaveTo(filePath string) (err error) {
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "\t")
-	return encoder.Encode(s)
+	return encoder.Encode(scn)
 }
 
-// ReadSequence reads a JSON representation from a given file and generate a valid request sequence.
-func ReadSequence(filePath string) (seq Sequence, err error) {
+// InitScenario reads a JSON representation from a given file if it does exists
+// and generate a valid scenario.
+// If the file does not exist, it will create and empty scenario
+// TODO: If file does not exists we create it, but we need to also takes into account and return other error cases.
+func InitScenario(filePath string) (scn *Scenario, created bool, err error) {
+	var s Scenario
+	s.path = filePath
 	file, err := os.Open(filePath)
 	if err != nil {
-		return seq, err
+		return &s, true, nil
 	}
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&seq)
-	return seq, err
+	err = decoder.Decode(&s)
+	if err != nil {
+		return &s, false, err
+	}
+	s.updateIndex()
+	return &s, false, nil
 }
+
+/*
+TODO(mr): Store a pure text file containing all the initial URLs used to generate a scenario
+   This can be used to rebuild it if the file format changes.
+*/

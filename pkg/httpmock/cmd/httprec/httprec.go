@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mime"
 	"net"
 	"net/http"
 	"net/url"
@@ -25,9 +26,11 @@ import (
 
 // Example:
 // go run pkg/httpmock/cmd/httprec/httprec.go https://pic.twitter.com/OPYJZhQ9ih test
+// go run pkg/httpmock/cmd/httprec/httprec.go https://pbs.twimg.com/media/DeywOwwWsAIij8t.jpg:large test
+// go run pkg/httpmock/cmd/httprec/httprec.go https://pic.twitter.com/ncJzTbz3dT scenario1
+// go run pkg/httpmock/cmd/httprec/httprec.go https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large scenario1
 
-// TODO(mr): Support method to be able to record posts.
-// TODO(mr): Make it possible to record a sequence of several URL to generate more complex artefact.
+// TODO(mr): Support method to be able to record http "POST" requests
 
 func main() {
 	args := os.Args[1:]
@@ -39,10 +42,20 @@ func main() {
 
 	var seq httpmock.Sequence
 	uri := args[0]
-	seqName := args[1]
+	scnName := args[1]
 	client := newHTTPClient()
 
-	// TODO(mr): Refactor to move to httpmock package.
+	scn, created, err := httpmock.InitScenario(scnName + ".json")
+	if err != nil {
+		fmt.Println("Cannot read scenario:", err)
+		os.Exit(2)
+	}
+	if !created {
+		fmt.Printf("Existing scenario: it contains %d sequences.\n", scn.Count())
+	}
+
+	// TODO(mr): Refactor to move to httpmock package core.
+	// Record a new sequence
 Loop:
 	for redirect := 0; redirect <= 10; redirect++ {
 		resp, err := client.Get(uri)
@@ -69,6 +82,7 @@ Loop:
 			location := resp.Header.Get("Location")
 			fmt.Println("Recording redirect to:", location)
 			step := httpmock.Step{
+				Method:     "GET",
 				RequestURL: uri,
 				Response:   r,
 			}
@@ -83,8 +97,9 @@ Loop:
 		default:
 			fmt.Println("Recording response:", resp.StatusCode)
 			// TODO(mr): Use response header to decide about the file extension
-			r.BodyFilename = fmt.Sprintf("%s-%d.html", seqName, redirect+1)
+			r.BodyFilename = fmt.Sprintf("%s-%d-%d%s", scnName, scn.Count()+1, redirect+1, extension(r.Header))
 			step := httpmock.Step{
+				Method:     "GET",
 				RequestURL: uri,
 				Response:   r,
 			}
@@ -97,19 +112,18 @@ Loop:
 		}
 	}
 
-	filename := seqName + ".json"
-	if err := seq.SaveTo(filename); err != nil {
-		fmt.Printf("Cannot save sequence to file %s: %s", filename, err)
+	// Add Sequence to scenario
+	if err = scn.AddSequence(seq); err != nil {
+		fmt.Println("Cannot add sequence to scenario:", err)
 		os.Exit(2)
 	}
 
-	// Test ReadSequence:
-	sequence, err := httpmock.ReadSequence(filename)
-	if err != nil {
-		fmt.Printf("Cannot read sequence from %s: %s", filename, err)
+	// Save file
+	filename := scnName + ".json"
+	if err := scn.SaveTo(filename); err != nil {
+		fmt.Printf("Cannot save sequence to file %s: %s", filename, err)
 		os.Exit(3)
 	}
-	fmt.Println(sequence)
 }
 
 //=============================================================================
@@ -151,4 +165,23 @@ func formatRedirectUrl(originalUrl, locationHeader string) (string, error) {
 		newUrl.Scheme = oldUrl.Scheme
 	}
 	return newUrl.String(), nil
+}
+
+func extension(header http.Header) string {
+	content := header["Content-Type"]
+	for _, typ := range content {
+		if ext, err := mime.ExtensionsByType(typ); err == nil {
+			// We return the longest known extension
+			bestExtension := ""
+			for _, e := range ext {
+				if len(e) > len(bestExtension) {
+					bestExtension = e
+				}
+			}
+			if bestExtension != "" {
+				return bestExtension
+			}
+		}
+	}
+	return ".data"
 }

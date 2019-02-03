@@ -7,16 +7,17 @@ import (
 	"github.com/processone/dpk/pkg/httpmock"
 )
 
-func TestSequenceCounterReset(t *testing.T) {
+func TestMultipleRuns(t *testing.T) {
 	// Setup HTTP Mock
 	client := httpmock.NewClient("fixtures/")
+	// Scenario is generated with: httprec https://t.co/tprDWoN8vm TwoSteps
 	fixtureName := "TwoSteps"
-	if err := client.LoadFixture(fixtureName); err != nil {
+	if err := client.LoadScenario(fixtureName); err != nil {
 		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
 		return
 	}
 
-	// We should be able to successfully execute the mock request twice.
+	// We should be able to successfully execute the mock request several times without any error:
 	for i := 0; i < 2; i++ {
 		resp, err := client.Get("https://t.co/tprDWoN8vm")
 		if err != nil {
@@ -28,5 +29,39 @@ func TestSequenceCounterReset(t *testing.T) {
 			t.Errorf("Cannot read page body: %s", err)
 			return
 		}
+	}
+}
+
+func TestMultipleSequences(t *testing.T) {
+	// Setup HTTP Mock
+	client := httpmock.NewClient("fixtures/")
+	// Scenario generated with:
+	// httprec https://pic.twitter.com/ncJzTbz3dT scenario1
+	// httprec https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large scenario1
+	fixtureName := "scenario1"
+	if err := client.LoadScenario(fixtureName); err != nil {
+		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
+		return
+	}
+	// We can get HTML page
+	resp, err := client.Get("https://pic.twitter.com/ncJzTbz3dT")
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+		return
+	}
+
+	if resp.StatusCode != 200 {
+		t.Errorf("Incorrect status on HTML get: %d", resp.StatusCode)
+	}
+
+	// We can get the image
+	resp, err = client.Get("https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large")
+	if err != nil {
+		t.Errorf("Get error: %s", err)
+		return
+	}
+
+	if resp.StatusCode != 200 {
+		t.Errorf("Incorrect status on HTML get: %d", resp.StatusCode)
 	}
 }

@@ -42,7 +42,7 @@ func TestGetImageUrl(t *testing.T) {
 	// Setup HTTP Mock
 	client := httpmock.NewClient("fixtures/")
 	fixtureName := "GetImageUrl"
-	if err := client.LoadFixture(fixtureName); err != nil {
+	if err := client.LoadScenario(fixtureName); err != nil {
 		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
 		return
 	}
