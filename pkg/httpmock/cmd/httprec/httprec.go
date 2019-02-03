@@ -96,7 +96,6 @@ Loop:
 			}
 		default:
 			fmt.Println("Recording response:", resp.StatusCode)
-			// TODO(mr): Use response header to decide about the file extension
 			r.BodyFilename = fmt.Sprintf("%s-%d-%d%s", scnName, scn.Count()+1, redirect+1, extension(r.Header))
 			step := httpmock.Step{
 				Method:     "GET",
