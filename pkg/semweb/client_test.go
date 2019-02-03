@@ -8,6 +8,7 @@ import (
 	"github.com/processone/dpk/pkg/semweb"
 )
 
+// TODO: Rewrite, based on new mock package.
 func TestFollowRedirect(t *testing.T) {
 	targetSite := "https://process-one.net"
 	responder := func(req *http.Request) (*http.Response, error) {

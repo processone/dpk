@@ -16,9 +16,18 @@ import (
 // Client adds safer default values to Go HTTP client and provide control
 // on redirect behaviour.
 type Client struct {
-	Client      *http.Client
+	Client      ClientBehaviour
 	MaxRedirect int
 	// TODO: Support debug logger
+}
+
+// Interface to be able to support client configuration
+type ClientBehaviour interface {
+	//Do(req *http.Request) (*http.Response, error)
+	Get(url string) (resp *http.Response, err error)
+	//Head(url string) (resp *http.Response, err error)
+	//Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+	//PostForm(url string, data url.Values) (resp *http.Response, err error)
 }
 
 type Response struct {
@@ -39,6 +48,12 @@ func NewClient() Client {
 		},
 	}
 	return Client{Client: &client, MaxRedirect: 7}
+}
+
+// SetBehaviour is used to replace the default HTTP client behaviour.
+// It can be used for customizing the HTTP client or for testing / instrumentation of the HTTP client.
+func (c *Client) SetBehaviour(httpClient ClientBehaviour) {
+	c.Client = httpClient
 }
 
 // Get returns a web page reader, following a predefined number of redirects.

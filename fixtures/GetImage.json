@@ -1,0 +1,192 @@
+{
+	"Sequences": [
+		{
+			"Steps": [
+				{
+					"RequestURL": "https://pic.twitter.com/ncJzTbz3dT",
+					"Method": "GET",
+					"Response": {
+						"Status": "301 Moved Permanently",
+						"StatusCode": 301,
+						"Proto": "HTTP/2.0",
+						"ProtoMajor": 2,
+						"ProtoMinor": 0,
+						"Header": {
+							"Cache-Control": [
+								"private,max-age=300"
+							],
+							"Content-Length": [
+								"0"
+							],
+							"Date": [
+								"Sun, 03 Feb 2019 17:01:13 GMT"
+							],
+							"Expires": [
+								"Sun, 03 Feb 2019 17:06:12 GMT"
+							],
+							"Location": [
+								"https://twitter.com/ProcessOne/status/1072447916298653698/photo/1"
+							],
+							"Server": [
+								"tsa_f"
+							],
+							"Set-Cookie": [
+								"muc=5ede936c-50a3-468a-85a0-3d3cf38637de; Max-Age=63072000; Expires=Tue, 2 Feb 2021 17:01:12 GMT; Domain=t.co",
+								"personalization_id=\"v1_BX0eUJk8DFA9nuInu/o16A==\"; Max-Age=63072000; Expires=Tue, 2 Feb 2021 17:01:12 GMT; Path=/; Domain=.twitter.com",
+								"guest_id=v1%3A154921327295751184; Max-Age=63072000; Expires=Tue, 2 Feb 2021 17:01:12 GMT; Path=/; Domain=.twitter.com"
+							],
+							"Strict-Transport-Security": [
+								"max-age=631138519"
+							],
+							"Vary": [
+								"Origin"
+							],
+							"X-Connection-Hash": [
+								"08149e7b56f63ba168fb713e0f56bebe"
+							],
+							"X-Response-Time": [
+								"113"
+							]
+						},
+						"BodyFilename": ""
+					},
+					"Err": ""
+				},
+				{
+					"RequestURL": "https://twitter.com/ProcessOne/status/1072447916298653698/photo/1",
+					"Method": "GET",
+					"Response": {
+						"Status": "200 OK",
+						"StatusCode": 200,
+						"Proto": "HTTP/2.0",
+						"ProtoMajor": 2,
+						"ProtoMinor": 0,
+						"Header": {
+							"Cache-Control": [
+								"no-cache, no-store, must-revalidate, pre-check=0, post-check=0"
+							],
+							"Content-Type": [
+								"text/html;charset=utf-8"
+							],
+							"Date": [
+								"Sun, 03 Feb 2019 17:01:13 GMT"
+							],
+							"Expires": [
+								"Tue, 31 Mar 1981 05:00:00 GMT"
+							],
+							"Last-Modified": [
+								"Sun, 03 Feb 2019 17:01:13 GMT"
+							],
+							"Pragma": [
+								"no-cache"
+							],
+							"Server": [
+								"tsa_f"
+							],
+							"Set-Cookie": [
+								"fm=0; Max-Age=0; Expires=Sun, 3 Feb 2019 17:01:13 GMT; Path=/; Domain=.twitter.com; Secure; HTTPOnly",
+								"_twitter_sess=BAh7CSIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%250ASGFzaHsABjoKQHVzZWR7ADoPY3JlYXRlZF9hdGwrCPuMTrRoAToMY3NyZl9p%250AZCIlZjAyMjRmYmE5YjM5ODVmOGVhZmQ5ZDFjNDgzNmJlN2U6B2lkIiUwODhi%250AMjQwMzA0NDFhYmIzY2I4OGExNjA5MDdjYThhYQ%253D%253D--8d0821f04a92a6e35074d4c43e692db2ce16525c; Path=/; Domain=.twitter.com; Secure; HTTPOnly",
+								"personalization_id=\"v1_PvWEXbKFX8CF6EU7FlBFPg==\"; Max-Age=63072000; Expires=Tue, 2 Feb 2021 17:01:13 GMT; Path=/; Domain=.twitter.com",
+								"guest_id=v1%3A154921327333774345; Max-Age=63072000; Expires=Tue, 2 Feb 2021 17:01:13 GMT; Path=/; Domain=.twitter.com",
+								"ct0=091ac01ebcd8f22bc4daf05e31d224be; Max-Age=21600; Expires=Sun, 3 Feb 2019 23:01:13 GMT; Path=/; Domain=.twitter.com; Secure"
+							],
+							"Status": [
+								"200 OK"
+							],
+							"Strict-Transport-Security": [
+								"max-age=631138519"
+							],
+							"X-Connection-Hash": [
+								"162d9e95245a0faf28dd3debee8c0d46"
+							],
+							"X-Content-Type-Options": [
+								"nosniff"
+							],
+							"X-Frame-Options": [
+								"DENY"
+							],
+							"X-Response-Time": [
+								"170"
+							],
+							"X-Transaction": [
+								"00ae6ce3006f0beb"
+							],
+							"X-Twitter-Response-Tags": [
+								"BouncerCompliant"
+							],
+							"X-Ua-Compatible": [
+								"IE=edge,chrome=1"
+							],
+							"X-Xss-Protection": [
+								"1; mode=block; report=https://twitter.com/i/xss_report"
+							]
+						},
+						"BodyFilename": "GetImage-1-2.html"
+					},
+					"Err": ""
+				}
+			]
+		},
+		{
+			"Steps": [
+				{
+					"RequestURL": "https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large",
+					"Method": "GET",
+					"Response": {
+						"Status": "200 OK",
+						"StatusCode": 200,
+						"Proto": "HTTP/2.0",
+						"ProtoMajor": 2,
+						"ProtoMinor": 0,
+						"Header": {
+							"Accept-Ranges": [
+								"bytes"
+							],
+							"Access-Control-Allow-Origin": [
+								"*"
+							],
+							"Access-Control-Expose-Headers": [
+								"Content-Length"
+							],
+							"Cache-Control": [
+								"max-age=604800, must-revalidate"
+							],
+							"Content-Length": [
+								"580727"
+							],
+							"Content-Type": [
+								"image/png"
+							],
+							"Date": [
+								"Sun, 03 Feb 2019 17:01:25 GMT"
+							],
+							"Last-Modified": [
+								"Tue, 11 Dec 2018 11:06:02 GMT"
+							],
+							"Server": [
+								"ECS (pox/A5DB)"
+							],
+							"Surrogate-Key": [
+								"media media/bucket/6 media/1072447913362710528"
+							],
+							"X-Cache": [
+								"HIT"
+							],
+							"X-Connection-Hash": [
+								"e71883f9a599e724f40acacd19b8fa43"
+							],
+							"X-Content-Type-Options": [
+								"nosniff"
+							],
+							"X-Response-Time": [
+								"121"
+							]
+						},
+						"BodyFilename": "GetImage-2-1.png"
+					},
+					"Err": ""
+				}
+			]
+		}
+	]
+}
