@@ -53,13 +53,13 @@ func (m *HTTPMock) LoadScenario(scenarioName string) error {
 
 		return resp, err
 	}
-	m.setResponder(responder)
+	m.SetResponder(responder)
 	return nil
 }
 
-// setResponder is used to defined your own responder for an HTTPMock client.
+// SetResponder is used to defined your own responder for an HTTPMock client.
 // It can be used for cases for which you to not have a scenario file to load.
-func (m *HTTPMock) setResponder(responder Responder) {
+func (m *HTTPMock) SetResponder(responder Responder) {
 	var t Transport
 	t.Responder = responder
 	m.Transport = &t
