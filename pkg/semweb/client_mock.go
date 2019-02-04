@@ -34,7 +34,7 @@ func NewMockClient(responder Responder) Client {
 
 	var mock Transport
 	mock.Responder = responder
-	c.Client.Transport = &mock
+	c.HTTPClient.Transport = &mock
 
 	return c
 }

@@ -17,7 +17,7 @@ type HTTPMock struct {
 }
 
 // Create a new HTTP client using a custom responder.
-func NewClient(fixtureDir string) HTTPMock {
+func NewMock(fixtureDir string) HTTPMock {
 	// Create HTTPClient
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{

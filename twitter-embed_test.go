@@ -23,7 +23,7 @@ func TestRewriteEmbedded(t *testing.T) {
 	defer os.RemoveAll(dir) // Clean up at end of test
 
 	// Setup HTTP Mock
-	client := httpmock.NewClient("fixtures/")
+	client := httpmock.NewMock("fixtures/")
 	fixtureName := "GetImage"
 	if err := client.LoadScenario(fixtureName); err != nil {
 		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
@@ -50,7 +50,7 @@ func TestRewriteEmbedded(t *testing.T) {
 
 func TestGetImageUrl(t *testing.T) {
 	// Setup HTTP Mock
-	mock := httpmock.NewClient("fixtures/")
+	mock := httpmock.NewMock("fixtures/")
 	// Scenario generated with:
 	// httprec https://pic.twitter.com/ncJzTbz3dT GetImage
 	// httprec https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large GetImage
@@ -61,7 +61,7 @@ func TestGetImageUrl(t *testing.T) {
 	}
 
 	picture := twitter.NewPicture()
-	picture.Client.Client = mock.Client
+	picture.Client.HTTPClient = mock.Client
 	twitterPic := "https://pic.twitter.com/ncJzTbz3dT"
 	imageUrl, err := picture.GetImageURL(twitterPic)
 	if err != nil {

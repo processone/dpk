@@ -9,17 +9,17 @@ import (
 
 func TestMultipleRuns(t *testing.T) {
 	// Setup HTTP Mock
-	client := httpmock.NewClient("fixtures/")
+	mock := httpmock.NewMock("fixtures/")
 	// Scenario is generated with: httprec https://t.co/tprDWoN8vm TwoSteps
 	fixtureName := "TwoSteps"
-	if err := client.LoadScenario(fixtureName); err != nil {
+	if err := mock.LoadScenario(fixtureName); err != nil {
 		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
 		return
 	}
 
 	// We should be able to successfully execute the mock request several times without any error:
 	for i := 0; i < 2; i++ {
-		resp, err := client.Get("https://t.co/tprDWoN8vm")
+		resp, err := mock.Get("https://t.co/tprDWoN8vm")
 		if err != nil {
 			t.Errorf("Get error: %s", err)
 			return
@@ -34,17 +34,17 @@ func TestMultipleRuns(t *testing.T) {
 
 func TestMultipleSequences(t *testing.T) {
 	// Setup HTTP Mock
-	client := httpmock.NewClient("fixtures/")
+	mock := httpmock.NewMock("fixtures/")
 	// Scenario generated with:
 	// httprec https://pic.twitter.com/ncJzTbz3dT scenario1
 	// httprec https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large scenario1
 	fixtureName := "scenario1"
-	if err := client.LoadScenario(fixtureName); err != nil {
+	if err := mock.LoadScenario(fixtureName); err != nil {
 		t.Errorf("Cannot load fixture %s: %s", fixtureName, err)
 		return
 	}
 	// We can get HTML page
-	resp, err := client.Get("https://pic.twitter.com/ncJzTbz3dT")
+	resp, err := mock.Get("https://pic.twitter.com/ncJzTbz3dT")
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 		return
@@ -55,7 +55,7 @@ func TestMultipleSequences(t *testing.T) {
 	}
 
 	// We can get the image
-	resp, err = client.Get("https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large")
+	resp, err = mock.Get("https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large")
 	if err != nil {
 		t.Errorf("Get error: %s", err)
 		return
