@@ -61,7 +61,7 @@ func TestGetImageUrl(t *testing.T) {
 	}
 
 	picture := twitter.NewPicture()
-	picture.SetBehaviour(mock)
+	picture.Client.Client = mock.Client
 	twitterPic := "https://pic.twitter.com/ncJzTbz3dT"
 	imageUrl, err := picture.GetImageURL(twitterPic)
 	if err != nil {
