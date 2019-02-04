@@ -2,7 +2,6 @@ package semweb_test
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -13,9 +12,6 @@ import (
 func TestFollowRedirect(t *testing.T) {
 	targetSite := "https://process-one.net"
 	responder := func(req *http.Request) (*http.Response, error) {
-		fmt.Println("In responder", req)
-		fmt.Println("In responder", req.URL.Host)
-
 		if req.URL.Host == "t.co" {
 			resp := semweb.RedirectResponse(targetSite)
 			resp.Request = req

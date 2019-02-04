@@ -49,6 +49,7 @@ func (m *HTTPMock) LoadScenario(scenarioName string) error {
 		seq := scn.Sequences[ref.sequenceID]
 		curStep := seq.Steps[ref.stepID]
 		resp, err := curStep.Response.ToHTTPResponse()
+		resp.Request = req
 
 		return resp, err
 	}
@@ -82,6 +83,7 @@ func (m *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// If responder is missing, returns an error:
 	if m.Responder == nil {
 		resp := http.Response{}
+		resp.Request = req
 		return &resp, errors.New("no responder found: you need to load a fixture")
 	}
 

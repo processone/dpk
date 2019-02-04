@@ -1,7 +1,6 @@
 package semweb
 
 import (
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -45,29 +44,26 @@ func (c Client) Get(url string) (io.ReadCloser, string, error) {
 	if err != nil {
 		return nil, url, err
 	}
-	finalURL := resp.Request.URL.String()
-	return resp.Body, finalURL, nil
+
+	if resp.Request != nil && resp.Request.URL != nil {
+		finalURL := resp.Request.URL.String()
+		return resp.Body, finalURL, nil
+	}
+	return resp.Body, url, nil
 }
 
 // Follow redirect and return final URL
 func (c Client) FollowRedirect(currentUrl string) string {
 	resp, err := c.HTTPClient.Get(currentUrl)
 	if err != nil {
-		fmt.Println("MREMOND 1")
 		return currentUrl
 	}
 
-	if resp.Request == nil {
-		fmt.Println("MREMOND 2")
-		return currentUrl
+	if resp.Request != nil && resp.Request.URL != nil {
+		finalURL := resp.Request.URL.String()
+		return finalURL
 	}
-	if resp.Request.URL == nil {
-		fmt.Println("MREMOND 3")
-		return currentUrl
-	}
-
-	finalURL := resp.Request.URL.String()
-	return finalURL
+	return currentUrl
 }
 
 // TODO: Should this method be on Context, taking only new link ?
