@@ -135,6 +135,7 @@ func formatRedirectUrl(originalUrl, locationHeader string) (string, error) {
 	return newUrl.String(), nil
 }
 
+// extension is used to get the extension to record HTTP response body.
 func extension(header http.Header) string {
 	content := header["Content-Type"]
 	for _, typ := range content {
