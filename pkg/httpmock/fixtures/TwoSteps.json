@@ -19,10 +19,10 @@
 								"0"
 							],
 							"Date": [
-								"Sun, 03 Feb 2019 16:42:03 GMT"
+								"Sat, 09 Feb 2019 15:58:14 GMT"
 							],
 							"Expires": [
-								"Sun, 03 Feb 2019 16:47:03 GMT"
+								"Sat, 09 Feb 2019 16:03:14 GMT"
 							],
 							"Location": [
 								"https://blog.process-one.net/moving-away-from-facebook/"
@@ -31,7 +31,7 @@
 								"tsa_f"
 							],
 							"Set-Cookie": [
-								"muc=e56fbcdc-ff62-4a4e-ab1d-ce2ed3ab5fc0; Max-Age=63072000; Expires=Tue, 2 Feb 2021 16:42:03 GMT; Domain=t.co"
+								"muc=a0e95e29-844d-44d6-94b1-9bf5f9180226; Max-Age=63072000; Expires=Mon, 8 Feb 2021 15:58:14 GMT; Domain=t.co"
 							],
 							"Strict-Transport-Security": [
 								"max-age=0"
@@ -40,10 +40,10 @@
 								"Origin"
 							],
 							"X-Connection-Hash": [
-								"c5d0859fce2022943d465759cc451ae9"
+								"35a864f0e8ce30f6a2713452de4325a3"
 							],
 							"X-Response-Time": [
-								"123"
+								"126"
 							]
 						},
 						"BodyFilename": ""
@@ -64,7 +64,7 @@
 								"text/html; charset=UTF-8"
 							],
 							"Date": [
-								"Sun, 03 Feb 2019 16:42:03 GMT"
+								"Sat, 09 Feb 2019 15:58:14 GMT"
 							],
 							"Expect-Ct": [
 								"enforce, max-age=30, report-uri=\"https://onefellow.report-uri.com/r/d/ct/enforce\""

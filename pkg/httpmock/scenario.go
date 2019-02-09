@@ -155,6 +155,26 @@ func (scn *Scenario) SaveTo(filePath string) (err error) {
 	return encoder.Encode(scn)
 }
 
+// SaveAsURLList stores a pure text file containing all the initial URLs used to generate a scenario
+// This can be used to rebuild the scenario file if the file format changes.
+func (scn *Scenario) SaveAsURLList(filePath string) (err error) {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	for _, seq := range scn.Sequences {
+		if len(seq.Steps) > 0 {
+			if _, err := file.WriteString(seq.Steps[0].RequestURL + "\n"); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 // InitScenario reads a JSON representation from a given file if it does exists
 // and generate a valid scenario.
 // If the file does not exist, it will create and empty scenario
@@ -177,7 +197,4 @@ func InitScenario(filePath string) (scn *Scenario, created bool, err error) {
 	return &s, false, nil
 }
 
-/*
-TODO(mr): Store a pure text file containing all the initial URLs used to generate a scenario
-   This can be used to rebuild it if the file format changes.
-*/
+// TODO: Rewrite date and expires header when replaying the scenario

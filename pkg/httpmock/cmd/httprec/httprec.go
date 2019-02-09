@@ -16,7 +16,7 @@ import (
 // The result can be used as an input for testing.
 // It is used to help simulating test involving HTTP requests.
 // The result is saved as a .gob file, a native format to serialize Go struct.
-// It also save a .url file containing the original URL. It can be useful to regenerate
+// It also save a .url file containing the original URLs. It can be useful to regenerate
 // the data if we need to change the structure of the Sequence.
 
 // params:
@@ -47,7 +47,7 @@ func main() {
 
 	scn, created, err := httpmock.InitScenario(scnName + ".json")
 	if err != nil {
-		fmt.Println("Cannot read scenario:", err)
+		fmt.Println("Cannot open scenario file:", err)
 		os.Exit(2)
 	}
 	if !created {
@@ -123,6 +123,10 @@ Loop:
 		fmt.Printf("Cannot save sequence to file %s: %s", filename, err)
 		os.Exit(3)
 	}
+
+	// Save basic .url files
+	filename = scnName + ".url"
+	scn.SaveAsURLList(filename)
 }
 
 //=============================================================================
