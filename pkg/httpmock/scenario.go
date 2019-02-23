@@ -19,7 +19,6 @@ type Step struct {
 }
 
 // SaveBody writes the content of the body to a separate file during the recording of a query.
-// TODO: Should be on a struct ?
 func (step Step) SaveBody(content io.Reader, toFile string) (err error) {
 	file, err := os.Create(toFile)
 	if err != nil {
@@ -126,16 +125,16 @@ func (scn *Scenario) AddSequence(seq Sequence) error {
 
 func (scn *Scenario) updateIndex() {
 	index := make(map[key]ref)
-	for seq_i, seq := range scn.Sequences {
-		for step_i, step := range seq.Steps {
+	for seqI, seq := range scn.Sequences {
+		for stepI, step := range seq.Steps {
 			key := key{
 				method: step.Method,
 				url:    step.RequestURL,
 			}
 			index[key] = ref{
 				exist:      true,
-				sequenceID: seq_i,
-				stepID:     step_i,
+				sequenceID: seqI,
+				stepID:     stepI,
 			}
 		}
 	}
@@ -197,4 +196,4 @@ func InitScenario(filePath string) (scn *Scenario, created bool, err error) {
 	return &s, false, nil
 }
 
-// TODO: Rewrite date and expires header when replaying the scenario
+// TODO: Rewrite 'date' and 'expires' headers when replaying the scenario

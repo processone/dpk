@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/processone/dpk/pkg/httpmock"
@@ -25,6 +26,7 @@ import (
 // httprec https://pic.twitter.com/ncJzTbz3dT scenario1
 // httprec https://pbs.twimg.com/media/DuIZsfQX4AAZFbs.png:large scenario1
 
+// TODO(mr): Use Cobra for parameters formatting
 // TODO(mr): Support method to be able to record http "POST" requests
 
 func main() {
@@ -38,7 +40,8 @@ func main() {
 	uri := args[0]
 	scnName := args[1]
 
-	if err := httpmock.Record(uri, scnName); err != nil {
+	recorder := httpmock.Recorder{Logger: log.New(os.Stderr, "", 0)}
+	if err := recorder.Record(uri, scnName); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

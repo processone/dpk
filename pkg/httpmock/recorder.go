@@ -2,6 +2,7 @@ package httpmock
 
 import (
 	"fmt"
+	"log"
 	"mime"
 	"net"
 	"net/http"
@@ -9,7 +10,11 @@ import (
 	"time"
 )
 
-func Record(uri string, scnName string) error {
+type Recorder struct {
+	Logger *log.Logger
+}
+
+func (rec Recorder) Record(uri string, scnName string) error {
 	client := newHTTPClient()
 
 	var seq Sequence
@@ -18,7 +23,7 @@ func Record(uri string, scnName string) error {
 		return fmt.Errorf("cannot open scenario file: %s", err)
 	}
 	if !created {
-		fmt.Printf("Existing scenario: it contains %d sequences.\n", scn.Count())
+		rec.logf("Updating existing scenario: it contains %d sequences.\n", scn.Count())
 	}
 
 	// Record a new sequence
@@ -28,7 +33,6 @@ Loop:
 
 		// on error
 		if err != nil {
-			fmt.Println("Recording error:", err)
 			step := Step{
 				RequestURL: uri,
 				Response:   NewResponse(resp),
@@ -46,7 +50,7 @@ Loop:
 		case resp.StatusCode >= 300 && resp.StatusCode < 400:
 			// Redirect
 			location := resp.Header.Get("Location")
-			fmt.Println("Recording redirect to:", location)
+			rec.logf("Recording redirect to: %s", location)
 			step := Step{
 				Method:     "GET",
 				RequestURL: uri,
@@ -61,7 +65,7 @@ Loop:
 				break Loop
 			}
 		default:
-			fmt.Println("Recording response:", resp.StatusCode)
+			rec.logf("Recording response: %d", resp.StatusCode)
 			r.BodyFilename = fmt.Sprintf("%s-%d-%d%s", scnName, scn.Count()+1, redirect+1, extension(r.Header))
 			step := Step{
 				Method:     "GET",
@@ -69,7 +73,7 @@ Loop:
 				Response:   r,
 			}
 			if err := step.SaveBody(resp.Body, r.BodyFilename); err != nil {
-				fmt.Printf("Cannot save body file %s: %s\n", r.BodyFilename, err)
+				rec.logf("Cannot save body file %s: %s\n", r.BodyFilename, err)
 			}
 			seq.Steps = append(seq.Steps, step)
 			_ = resp.Body.Close()
@@ -92,6 +96,10 @@ Loop:
 	}
 
 	return nil
+}
+
+func (rec Recorder) logf(format string, a ...interface{}) {
+	rec.Logger.Printf(format, a)
 }
 
 //=============================================================================
