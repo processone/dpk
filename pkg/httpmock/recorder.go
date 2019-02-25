@@ -99,7 +99,7 @@ Loop:
 }
 
 func (rec Recorder) logf(format string, a ...interface{}) {
-	rec.Logger.Printf(format, a)
+	rec.Logger.Printf(format, a...)
 }
 
 //=============================================================================
