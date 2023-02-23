@@ -29,8 +29,7 @@ You can take back control of your data incrementally. That said, we encourage yo
 ## General principles
 
 The goal of the tool is to produce a data set that is self-contained and directly usable. As such, we do not want to rely on third-party
-services that can disappear at anytime. That's why as much as we can, we try to resolve short URLs to their final
-target.
+services that can disappear at anytime. That's why as much as we can, we try to resolve short URLs to their final target.
 
 We also do not want to promote trackers. When using Twitter oembed for example, we sanitize the provided HTML and
 thus we do not includes the `widget.js` Javascript tags. If we embed third-party  content as a convenience (for playing
