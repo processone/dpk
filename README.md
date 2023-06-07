@@ -34,7 +34,7 @@ services that can disappear at anytime. That's why as much as we can, we try to 
 We also do not want to promote trackers. When using Twitter oembed for example, we sanitize the provided HTML and
 thus we do not includes the `widget.js` Javascript tags. If we embed third-party  content as a convenience (for playing
 videos inline for example), it will be asynchonously, on user demand. This, thus will be compliant with browser Do Not
-Track policy. We will not even check if Do Not Track is enabled and assume it is enabled (as it should be).
+Track policy. We will not even check if Do Not Track (DNT) is enabled and assume it is enabled (as it should be).
 
 ## Data conversion
 
